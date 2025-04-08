@@ -1,11 +1,101 @@
 package db
 
-import (
-	"database/sql"
-	"log"
+import "log"
 
-	_ "github.com/mattn/go-sqlite3"
-)
+// unused
+type ImportOptions struct {
+}
+
+// unused
+type ExportOptions struct {
+}
+
+type Marker struct {
+	StartPosition int
+	Bpm           float64
+	BeatNumber    int
+}
+
+type Cue struct {
+	Name     string
+	Offset   float64
+	Position int
+}
+
+type Loop struct {
+	Name     string
+	Offset   float64
+	Length   int
+	Position int
+}
+
+type Song struct {
+	SongID       int
+	Title        string
+	Artist       string
+	Composer     string
+	Album        string
+	Grouping     string
+	Genre        string
+	Filetype     string
+	Size         int
+	Length       float32
+	TrackNumber  int
+	Year         int
+	Bpm          float32
+	DateModified int
+	DateAdded    int
+	Bitrate      int
+	SampleRate   float64
+	Comment      string
+	PlayCount    int
+	LastPlayed   int
+	Rating       int
+	Path         string
+	Remixer      string
+	Key          string
+	Label        string
+	Mix          string
+	Color        string
+	Grid         []Marker
+	Cues         []Cue
+	Loops        []Loop
+}
+
+type Playlist struct {
+	PlaylistID int
+	Position   int
+	Name       string
+	Songs      []*Song
+}
+
+type Folder struct {
+	FolderID  int
+	Name      string
+	Position  int
+	Playlists []*Playlist
+}
+
+type Library struct {
+	Songs     []Song
+	Playlists []Playlist
+	Folders   []Folder
+}
+
+func TestLibrary() Library {
+	songs := []Song{
+		{SongID: 1, Title: "test1", Artist: "artist1"},
+		{SongID: 2, Title: "test2", Artist: "artist2"},
+		{SongID: 3, Title: "test3", Artist: "artist3"},
+	}
+	playlists := []Playlist{
+		{PlaylistID: 1, Position: 1, Name: "playlist1", Songs: []*Song{&songs[0], &songs[1], &songs[2]}},
+		{PlaylistID: 2, Position: 2, Name: "playlist2", Songs: []*Song{&songs[0], &songs[1]}},
+	}
+	folders := []Folder{{FolderID: 1, Name: "folder1", Position: 1, Playlists: []*Playlist{&playlists[0], &playlists[1]}}}
+
+	return Library{songs, playlists, folders}
+}
 
 func logError(err error) {
 	if err != nil {
@@ -13,89 +103,17 @@ func logError(err error) {
 	}
 }
 
-func InitLibrary() {
-	db, err := sql.Open("sqlite3", "./library.db")
-	logError(err)
+// TBI
+func Validate(library Library) (bool, string, error) {
+	return true, "", nil
+}
 
-	defer db.Close()
+// TBI
+func Import(program string, path string, options ImportOptions) (Library, error) {
+	return Library{}, nil
+}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS songs (
-		songID INTEGER PRIMARY KEY,
-		title TEXT,
-		artist TEXT,
-		composer TEXT,
-		album TEXT,
-		grouping TEXT,
-		genre TEXT,
-		type TEXT,
-		size INT,
-		length REAL,
-		albumArt BLOB,
-		trackNumber INT,
-		year INT,
-		bpm REAL,
-		dateModified INT,
-		bitrate INT,
-		sampleRate REAL,
-		comment TEXT,
-		playCount INT,
-		lastPlayed INT,
-		rating INT,
-		path TEXT,
-		remixer TEXT,
-		key TEXT,
-		label TEXT,
-		mix TEXT,
-		color TEXT
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS grids (
-		startPosition REAL,
-		bpm REAL,
-		songID INT,
-		beatNumber INT
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS cues (
-		name TEXT,
-		songID INT,
-		offset REAL,
-		position INT
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS loops (
-		name TEXT,
-		songID INT,
-		offset REAL,
-		position INT,
-		length REAL
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS playlists (
-		playlistID INT PRIMARY KEY,
-		position INT,
-		name TEXT,
-		smartPlaylist INT,
-		parameters TEXT,
-		folderID INT
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS playlistContent (
-		songID INT,
-		playlistID INT,
-		position INT
-	)`)
-	logError(err)
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS folders (
-		folderID INT PRIMARY KEY,
-		position INT,
-		name TEXT
-	)`)
-	logError(err)
+// TBI
+func Export(library Library, program string, path string, options ExportOptions) error {
+	return nil
 }
