@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/nateranda/djtools/db"
@@ -14,7 +13,6 @@ func logError(err error) {
 }
 
 func main() {
-	library, err := db.EnImportExtract(db.Library{}, "./databases/engine/")
+	_, err := db.EnImportExtract("./databases/engine/")
 	logError(err)
-	fmt.Println(library)
 }

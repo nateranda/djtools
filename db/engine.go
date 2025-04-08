@@ -8,7 +8,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type songNull struct {
+type enLibrary struct {
+	songs       []enSongNull
+	historyList []enHistoryListEntity
+}
+
+type enSongNull struct {
 	SongID    sql.NullInt64
 	Title     sql.NullString
 	Artist    sql.NullString
@@ -30,18 +35,106 @@ type songNull struct {
 	Label     sql.NullString
 }
 
-type historyListEntity struct {
+type enHistoryListEntity struct {
 	trackId   int
 	startTime int
 }
 
-type songHistory struct {
+// unused
+type enSongHistory struct {
 	songID     int
 	plays      int
 	lastPlayed int
 }
 
-func songNullCorrect(song songNull) Song {
+func enImportExtractTrack(db *sql.DB) []enSongNull {
+	var songs []enSongNull
+
+	query := `SELECT id, title, artist, composer,
+		album, genre, fileType, fileBytes,
+		length, year, bpm, dateAdded,
+		bitrate, comment, rating, path,
+		remixer, key, label
+		FROM Track ORDER BY id`
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		song := enSongNull{}
+		err := r.Scan(
+			&song.SongID,
+			&song.Title,
+			&song.Artist,
+			&song.Composer,
+			&song.Album,
+			&song.Genre,
+			&song.Filetype,
+			&song.Size,
+			&song.Length,
+			&song.Year,
+			&song.Bpm,
+			&song.DateAdded,
+			&song.Bitrate,
+			&song.Comment,
+			&song.Rating,
+			&song.Path,
+			&song.Remixer,
+			&song.Key,
+			&song.Label,
+		)
+		logError(err)
+		songs = append(songs, song)
+	}
+
+	return songs
+}
+
+func enImportExtractHistory(db *sql.DB) []enHistoryListEntity {
+	query := `SELECT Track.originTrackId, HistorylistEntity.startTime
+		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
+		ORDER BY originTrackId, startTime`
+
+	var historyList []enHistoryListEntity
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		enHistoryListEntity := enHistoryListEntity{}
+		startTime := time.Time{}
+		err := r.Scan(&enHistoryListEntity.trackId, &startTime)
+		logError(err)
+		enHistoryListEntity.startTime = int(startTime.Unix())
+		historyList = append(historyList, enHistoryListEntity)
+	}
+
+	return historyList
+}
+
+func EnImportExtract(path string) (enLibrary, error) {
+	var enLibrary enLibrary
+
+	dbm, err := sql.Open("sqlite3", path+"m.db")
+	logError(err)
+	defer dbm.Close()
+
+	dbhm, err := sql.Open("sqlite3", path+"hm.db")
+	logError(err)
+	defer dbhm.Close()
+
+	enLibrary.songs = enImportExtractTrack(dbm)
+	enLibrary.historyList = enImportExtractHistory(dbhm)
+
+	fmt.Println(enLibrary.songs[0])
+	fmt.Println(enLibrary.historyList[0])
+	return enLibrary, nil
+}
+
+// unused
+func enImportConvertSong(song enSongNull) Song {
 	return Song{
 		SongID:    int(song.SongID.Int64),
 		Title:     song.Title.String,
@@ -65,116 +158,31 @@ func songNullCorrect(song songNull) Song {
 	}
 }
 
-func enImportExtractTrack(db *sql.DB, songs []Song) []Song {
-	query := `SELECT id, title, artist, composer,
-		album, genre, fileType, fileBytes,
-		length, year, bpm, dateAdded,
-		bitrate, comment, rating, path,
-		remixer, key, label
-		FROM Track ORDER BY id`
-
-	r, err := db.Query(query)
-	logError(err)
-	defer r.Close()
-
-	for r.Next() {
-		songNull := songNull{}
-		err := r.Scan(
-			&songNull.SongID,
-			&songNull.Title,
-			&songNull.Artist,
-			&songNull.Composer,
-			&songNull.Album,
-			&songNull.Genre,
-			&songNull.Filetype,
-			&songNull.Size,
-			&songNull.Length,
-			&songNull.Year,
-			&songNull.Bpm,
-			&songNull.DateAdded,
-			&songNull.Bitrate,
-			&songNull.Comment,
-			&songNull.Rating,
-			&songNull.Path,
-			&songNull.Remixer,
-			&songNull.Key,
-			&songNull.Label,
-		)
-		logError(err)
-		song := songNullCorrect(songNull)
-		songs = append(songs, song)
-	}
-
-	return songs
-}
-
-func getSongHistoryData(historyList []historyListEntity) []songHistory {
+// unused
+func enImportConvertSongHistory(historyList []enHistoryListEntity) []enSongHistory {
 	var songId int
 	var lastPlayed int
 	plays := 1
 
-	var songHistoryData []songHistory
+	var enSongHistoryData []enSongHistory
 
-	for i, historyListEntity := range historyList {
-		if historyListEntity.trackId > songId && i != 0 {
-			songHistoryData = append(songHistoryData, songHistory{songId, plays, lastPlayed})
+	for i, enHistoryListEntity := range historyList {
+		if enHistoryListEntity.trackId > songId && i != 0 {
+			enSongHistoryData = append(enSongHistoryData, enSongHistory{songId, plays, lastPlayed})
 			plays = 0
 		}
-		songId = historyListEntity.trackId
-		lastPlayed = historyListEntity.startTime
+		songId = enHistoryListEntity.trackId
+		lastPlayed = enHistoryListEntity.startTime
 		plays += 1
 	}
-	songHistoryData = append(songHistoryData, songHistory{songId, plays, lastPlayed})
+	enSongHistoryData = append(enSongHistoryData, enSongHistory{songId, plays, lastPlayed})
 
-	return songHistoryData
-}
-
-func enImportExtractHistory(songs []Song, db_path string) []Song {
-	db, err := sql.Open("sqlite3", db_path+"hm.db")
-	logError(err)
-	defer db.Close()
-
-	query := `SELECT Track.originTrackId, HistorylistEntity.startTime
-		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
-		ORDER BY originTrackId, startTime`
-
-	historyList := []historyListEntity{}
-
-	r, err := db.Query(query)
-	logError(err)
-	defer r.Close()
-
-	for r.Next() {
-		historyListEntity := historyListEntity{}
-		startTime := time.Time{}
-		err := r.Scan(&historyListEntity.trackId, &startTime)
-		logError(err)
-		historyListEntity.startTime = int(startTime.Unix())
-		historyList = append(historyList, historyListEntity)
-	}
-
-	// move this to enImportConvert
-	songHistoryData := getSongHistoryData(historyList)
-	fmt.Println(songHistoryData)
-	return songs
-}
-
-func EnImportExtract(library Library, path string) (Library, error) {
-	db, err := sql.Open("sqlite3", path+"m.db")
-	logError(err)
-	defer db.Close()
-
-	var songs []Song
-
-	songs = enImportExtractTrack(db, songs)
-	songs = enImportExtractHistory(songs, path)
-	fmt.Println(songs[0])
-	return Library{}, nil
+	return enSongHistoryData
 }
 
 // TBI
-func enImportConvert(library Library) (Library, error) {
-	return library, nil
+func enImportConvert(enLibrary enLibrary) (Library, error) {
+	return Library{}, nil
 }
 
 // TBI
@@ -186,9 +194,9 @@ func enImportInject(library Library) (Library, error) {
 func EnImport(path string, options ImportOptions) (Library, error) {
 	var library Library
 
-	library, err := EnImportExtract(library, path)
+	enLibrary, err := EnImportExtract(path)
 	logError(err)
-	library, err = enImportConvert(library)
+	library, err = enImportConvert(enLibrary)
 	logError(err)
 	library, err = enImportInject(library)
 	logError(err)
