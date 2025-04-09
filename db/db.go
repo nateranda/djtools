@@ -1,6 +1,13 @@
 package db
 
-import "log"
+import (
+	"bytes"
+	"compress/zlib"
+	"encoding/binary"
+	"errors"
+	"io"
+	"log"
+)
 
 // unused
 type ImportOptions struct {
@@ -11,7 +18,7 @@ type ExportOptions struct {
 }
 
 type Marker struct {
-	StartPosition int
+	StartPosition float64
 	Bpm           float64
 	BeatNumber    int
 }
@@ -101,6 +108,32 @@ func logError(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// qUncompress uncompresses a uInt32-appended byte slice using zlib
+// used for blobs compressed with the QT C++ library's qCompress function
+func qUncompress(file []byte) ([]byte, error) {
+	uncompressLength := binary.BigEndian.Uint32(file[:4])
+	buffer := bytes.NewBuffer(file[4:])
+	r, err := zlib.NewReader(buffer)
+	logError(err)
+
+	defer r.Close()
+
+	var out bytes.Buffer
+	_, err = io.Copy(&out, r)
+	logError(err)
+
+	fileDecomp := out.Bytes()
+
+	// check if the file's uncompressed length matches the header
+	if len(fileDecomp) != int(uncompressLength) {
+		err := errors.New("db: uncompressed file length does not match length header")
+		return []byte{}, err
+	} else {
+		return fileDecomp, nil
+	}
+
 }
 
 // TBI

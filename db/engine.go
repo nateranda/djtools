@@ -2,7 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"encoding/binary"
 	"fmt"
+	"math"
+	"os"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -45,6 +48,14 @@ type enSongHistory struct {
 	songID     int
 	plays      int
 	lastPlayed int
+}
+
+type enPerformanceDataEntry struct {
+	trackId   int
+	trackData []byte
+	beatData  []byte
+	quickCues []byte
+	loops     []byte
 }
 
 func enImportExtractTrack(db *sql.DB) []enSongNull {
@@ -114,23 +125,34 @@ func enImportExtractHistory(db *sql.DB) []enHistoryListEntity {
 	return historyList
 }
 
-func EnImportExtract(path string) (enLibrary, error) {
-	var enLibrary enLibrary
-
-	dbm, err := sql.Open("sqlite3", path+"m.db")
+func enDLBeatData(perfData enPerformanceDataEntry) {
+	err := os.WriteFile("tmp/trackData", perfData.trackData, 0644)
 	logError(err)
-	defer dbm.Close()
-
-	dbhm, err := sql.Open("sqlite3", path+"hm.db")
+	err = os.WriteFile("tmp/beatData", perfData.beatData, 0644)
 	logError(err)
-	defer dbhm.Close()
+	err = os.WriteFile("tmp/quickCues", perfData.quickCues, 0644)
+	logError(err)
+	err = os.WriteFile("tmp/loops", perfData.loops, 0644)
+	logError(err)
+}
 
-	enLibrary.songs = enImportExtractTrack(dbm)
-	enLibrary.historyList = enImportExtractHistory(dbhm)
+func enImportExtractPerformanceData(db *sql.DB) {
+	query := `SELECT trackId, trackData, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
-	fmt.Println(enLibrary.songs[0])
-	fmt.Println(enLibrary.historyList[0])
-	return enLibrary, nil
+	var perfDataList []enPerformanceDataEntry
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		var perfData enPerformanceDataEntry
+		err := r.Scan(&perfData.trackId, &perfData.trackData, &perfData.beatData, &perfData.quickCues, &perfData.loops)
+		logError(err)
+		perfDataList = append(perfDataList, perfData)
+	}
+
+	enDLBeatData(perfDataList[4])
 }
 
 // unused
@@ -178,6 +200,65 @@ func enImportConvertSongHistory(historyList []enHistoryListEntity) []enSongHisto
 	enSongHistoryData = append(enSongHistoryData, enSongHistory{songId, plays, lastPlayed})
 
 	return enSongHistoryData
+}
+
+func EnImportConvertGrid() {
+	beatDataComp, err := os.ReadFile("tmp/beatData")
+	logError(err)
+
+	beatData, err := qUncompress(beatDataComp)
+	logError(err)
+
+	fmt.Println(beatData)
+
+	// get sample rate
+	i := 0
+	sampleRate := math.Float64frombits(binary.BigEndian.Uint64(beatData[i : i+8]))
+	i += 17
+
+	// skip past original beatgrid
+	numMarkers := int(binary.BigEndian.Uint64(beatData[i : i+8]))
+	fmt.Println(numMarkers)
+	i += 8 + 24*numMarkers
+
+	// save adjusted beatgrid
+	numMarkers = int(binary.BigEndian.Uint64(beatData[i : i+8]))
+	i += 8
+
+	var markerList []Marker
+
+	for range numMarkers - 1 {
+		var marker Marker
+		sampleOffset := math.Float64frombits(binary.LittleEndian.Uint64(beatData[i : i+8]))
+		marker.StartPosition = sampleOffset / sampleRate
+		i += 8
+		marker.BeatNumber = int(binary.LittleEndian.Uint64(beatData[i : i+8]))
+		i += 8
+		numBeats := binary.LittleEndian.Uint32(beatData[i : i+4])
+		fmt.Println(numBeats)
+		markerList = append(markerList, marker)
+		i += 8
+	}
+
+	fmt.Println(markerList)
+}
+
+func EnImportExtract(path string) (enLibrary, error) {
+	var enLibrary enLibrary
+
+	dbm, err := sql.Open("sqlite3", path+"m.db")
+	logError(err)
+	defer dbm.Close()
+
+	dbhm, err := sql.Open("sqlite3", path+"hm.db")
+	logError(err)
+	defer dbhm.Close()
+
+	enLibrary.songs = enImportExtractTrack(dbm)
+	enLibrary.historyList = enImportExtractHistory(dbhm)
+	// enImportExtractPerformanceData(dbm)
+
+	return enLibrary, nil
 }
 
 // TBI

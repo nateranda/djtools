@@ -13,6 +13,8 @@ func logError(err error) {
 }
 
 func main() {
-	_, err := db.EnImportExtract("./databases/engine/")
-	logError(err)
+	//_, err := db.EnImportExtract("./databases/engine/")
+	//logError(err)
+
+	db.EnImportConvertGrid()
 }
