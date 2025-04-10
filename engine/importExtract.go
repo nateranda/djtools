@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+func ImportExtractInitDB(path string) (*sql.DB, *sql.DB) {
+	m, err := sql.Open("sqlite3", path+"m.db")
+	logError(err)
+	hm, err := sql.Open("sqlite3", path+"hm.db")
+	logError(err)
+
+	return m, hm
+}
+
 func importExtractTrack(db *sql.DB) []SongNull {
 	var songs []SongNull
 
@@ -72,7 +81,7 @@ func importExtractHistory(db *sql.DB) []HistoryListEntity {
 	return historyList
 }
 
-func importExtractPerformanceData(db *sql.DB) {
+func importExtractPerformanceData(db *sql.DB) []PerformanceDataEntry {
 	query := `SELECT trackId, trackData, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
 	var perfDataList []PerformanceDataEntry
@@ -88,5 +97,62 @@ func importExtractPerformanceData(db *sql.DB) {
 		perfDataList = append(perfDataList, perfData)
 	}
 
-	DLBeatData(perfDataList[4])
+	return perfDataList
+}
+
+func importExtractPlaylist(db *sql.DB) []playlist {
+	query := `SELECT id, title, parentListId, nextListId FROM Playlist ORDER BY id`
+
+	var playlists []playlist
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		var playlist playlist
+		err := r.Scan(&playlist.playlistId, &playlist.title, &playlist.parentListId, &playlist.nextListId)
+		logError(err)
+		playlists = append(playlists, playlist)
+	}
+
+	return playlists
+}
+
+func importExtractPlaylistEntity(db *sql.DB) []playlistEntity {
+	query := `SELECT listId, trackId, nextEntityId FROM PlaylistEntity ORDER BY trackId`
+
+	var playlistEntityList []playlistEntity
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		var playlistEntity playlistEntity
+		err := r.Scan(&playlistEntity.listId, &playlistEntity.trackId, &playlistEntity.nextEntityId)
+		logError(err)
+		playlistEntityList = append(playlistEntityList, playlistEntity)
+	}
+
+	return playlistEntityList
+}
+
+func importExtractSmartlist(db *sql.DB) []smartlist {
+	query := `SELECT listUuid, title, parentPlaylistPath, nextPlaylistPath, nextListUuid, rules FROM Smartlist ORDER BY listUuid`
+
+	var smartlistList []smartlist
+
+	r, err := db.Query(query)
+	logError(err)
+	defer r.Close()
+
+	for r.Next() {
+		var smartlist smartlist
+		err := r.Scan(&smartlist.listUuid, &smartlist.title, &smartlist.parentPlaylistPath, &smartlist.nextPlaylistPath, &smartlist.nextListUuid, &smartlist.rules)
+		logError(err)
+		smartlistList = append(smartlistList, smartlist)
+	}
+
+	return smartlistList
 }

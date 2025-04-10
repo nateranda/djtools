@@ -13,8 +13,12 @@ import (
 )
 
 type Library struct {
-	songs       []SongNull
-	historyList []HistoryListEntity
+	songs              []SongNull
+	historyList        []HistoryListEntity
+	perfData           []PerformanceDataEntry
+	playlists          []playlist
+	playlistEntityList []playlistEntity
+	smartlistList      []smartlist
 }
 
 type SongNull struct {
@@ -57,6 +61,28 @@ type PerformanceDataEntry struct {
 	beatData  []byte
 	quickCues []byte
 	loops     []byte
+}
+
+type playlist struct {
+	playlistId   int
+	title        string
+	parentListId int
+	nextListId   int
+}
+
+type playlistEntity struct {
+	listId       int
+	trackId      int
+	nextEntityId int
+}
+
+type smartlist struct {
+	listUuid           string
+	title              string
+	parentPlaylistPath sql.NullString
+	nextPlaylistPath   sql.NullString
+	nextListUuid       sql.NullString
+	rules              string
 }
 
 func logError(err error) {

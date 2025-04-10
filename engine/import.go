@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"database/sql"
 	"os"
 
 	"github.com/nateranda/djtools/db"
@@ -21,17 +20,14 @@ func DLBeatData(perfData PerformanceDataEntry) {
 func ImportExtract(path string) (Library, error) {
 	var Library Library
 
-	dbm, err := sql.Open("sqlite3", path+"m.db")
-	logError(err)
-	defer dbm.Close()
-
-	dbhm, err := sql.Open("sqlite3", path+"hm.db")
-	logError(err)
-	defer dbhm.Close()
-
-	Library.songs = importExtractTrack(dbm)
-	Library.historyList = importExtractHistory(dbhm)
-	// ImportExtractPerformanceData(dbm)
+	m, hm := ImportExtractInitDB(path)
+	Library.songs = importExtractTrack(m)
+	Library.historyList = importExtractHistory(hm)
+	Library.perfData = importExtractPerformanceData(m)
+	Library.playlists = importExtractPlaylist(m)
+	Library.playlistEntityList = importExtractPlaylistEntity(m)
+	Library.smartlistList = importExtractSmartlist(m)
+	// ImportExtractPerformanceData(m)
 
 	return Library, nil
 }
