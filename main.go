@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/engine"
 )
 
 func logError(err error) {
@@ -16,5 +16,5 @@ func main() {
 	//_, err := db.EnImportExtract("./databases/engine/")
 	//logError(err)
 
-	db.EnImportConvertGrid()
+	engine.ImportConvertGrid()
 }
