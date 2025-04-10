@@ -87,7 +87,7 @@ type smartlist struct {
 
 func logError(err error) {
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 }
 
