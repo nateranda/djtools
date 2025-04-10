@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -45,7 +46,7 @@ type SongNull struct {
 
 type HistoryListEntity struct {
 	trackId   int
-	startTime int
+	startTime time.Time
 }
 
 // unused

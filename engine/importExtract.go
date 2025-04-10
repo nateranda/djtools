@@ -2,7 +2,6 @@ package engine
 
 import (
 	"database/sql"
-	"time"
 )
 
 func ImportExtractInitDB(path string) (*sql.DB, *sql.DB) {
@@ -71,10 +70,8 @@ func importExtractHistory(db *sql.DB) []HistoryListEntity {
 
 	for r.Next() {
 		HistoryListEntity := HistoryListEntity{}
-		startTime := time.Time{}
-		err := r.Scan(&HistoryListEntity.trackId, &startTime)
+		err := r.Scan(&HistoryListEntity.trackId, &HistoryListEntity.startTime)
 		logError(err)
-		HistoryListEntity.startTime = int(startTime.Unix())
 		historyList = append(historyList, HistoryListEntity)
 	}
 
