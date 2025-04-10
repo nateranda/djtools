@@ -48,7 +48,7 @@ func importConvertSongHistory(historyList []HistoryListEntity) []SongHistory {
 			plays = 0
 		}
 		songId = HistoryListEntity.trackId
-		lastPlayed = HistoryListEntity.startTime
+		lastPlayed = int(HistoryListEntity.startTime.Unix())
 		plays += 1
 	}
 	SongHistoryData = append(SongHistoryData, SongHistory{songId, plays, lastPlayed})
