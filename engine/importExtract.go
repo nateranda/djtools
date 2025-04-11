@@ -4,15 +4,6 @@ import (
 	"database/sql"
 )
 
-func ImportExtractInitDB(path string) (*sql.DB, *sql.DB) {
-	m, err := sql.Open("sqlite3", path+"m.db")
-	logError(err)
-	hm, err := sql.Open("sqlite3", path+"hm.db")
-	logError(err)
-
-	return m, hm
-}
-
 func importExtractTrack(db *sql.DB) []SongNull {
 	var songs []SongNull
 
@@ -78,7 +69,7 @@ func importExtractHistory(db *sql.DB) []HistoryListEntity {
 	return historyList
 }
 
-func importExtractPerformanceData(db *sql.DB) []PerformanceDataEntry {
+func ImportExtractPerformanceData(db *sql.DB) []PerformanceDataEntry {
 	query := `SELECT trackId, trackData, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
 	var perfDataList []PerformanceDataEntry

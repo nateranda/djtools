@@ -9,6 +9,46 @@ import (
 	"github.com/nateranda/djtools/db"
 )
 
+func beatDataFromBlob(blob []byte) beatData {
+	var beatData beatData
+	i := 0 // byte index
+
+	// get sample rate
+	beatData.sampleRate = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+	i += 17 // skip past track length and beatgrid set byte, not needed
+
+	// save normal beatgrid
+	numMarkers := binary.BigEndian.Uint64(blob[i : i+8])
+	i += 8
+
+	for range numMarkers {
+		var marker marker
+		marker.offset = math.Float64frombits(binary.LittleEndian.Uint64(blob[i : i+8]))
+		i += 8
+		marker.beatNumber = int64(binary.LittleEndian.Uint64(blob[i : i+8]))
+		i += 8
+		marker.numBeats = binary.LittleEndian.Uint32(blob[i : i+4])
+		i += 8
+		beatData.defaultBeatgrid = append(beatData.defaultBeatgrid, marker)
+	}
+
+	// save adjusted beatgrid
+	numMarkers = binary.BigEndian.Uint64(blob[i : i+8])
+	i += 8
+	for range numMarkers {
+		var marker marker
+		marker.offset = math.Float64frombits(binary.LittleEndian.Uint64(blob[i : i+8]))
+		i += 8
+		marker.beatNumber = int64(binary.LittleEndian.Uint64(blob[i : i+8]))
+		i += 8
+		marker.numBeats = binary.LittleEndian.Uint32(blob[i : i+4])
+		i += 8
+		beatData.adjBeatgrid = append(beatData.adjBeatgrid, marker)
+	}
+
+	return beatData
+}
+
 // unused
 func importConvertSong(song SongNull) db.Song {
 	return db.Song{
@@ -60,39 +100,11 @@ func ImportConvertGrid() {
 	beatDataComp, err := os.ReadFile("tmp/beatData")
 	logError(err)
 
-	beatData, err := qUncompress(beatDataComp)
+	beatDataBlob, err := qUncompress(beatDataComp)
 	logError(err)
 
+	fmt.Println(beatDataBlob)
+
+	beatData := beatDataFromBlob(beatDataBlob)
 	fmt.Println(beatData)
-
-	// get sample rate
-	i := 0
-	sampleRate := math.Float64frombits(binary.BigEndian.Uint64(beatData[i : i+8]))
-	i += 17
-
-	// skip past original beatgrid
-	numMarkers := int(binary.BigEndian.Uint64(beatData[i : i+8]))
-	fmt.Println(numMarkers)
-	i += 8 + 24*numMarkers
-
-	// save adjusted beatgrid
-	numMarkers = int(binary.BigEndian.Uint64(beatData[i : i+8]))
-	i += 8
-
-	var markerList []db.Marker
-
-	for range numMarkers - 1 {
-		var marker db.Marker
-		sampleOffset := math.Float64frombits(binary.LittleEndian.Uint64(beatData[i : i+8]))
-		marker.StartPosition = sampleOffset / sampleRate
-		i += 8
-		marker.BeatNumber = int(binary.LittleEndian.Uint64(beatData[i : i+8]))
-		i += 8
-		numBeats := binary.LittleEndian.Uint32(beatData[i : i+4])
-		fmt.Println(numBeats)
-		markerList = append(markerList, marker)
-		i += 8
-	}
-
-	fmt.Println(markerList)
 }

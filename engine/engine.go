@@ -86,13 +86,25 @@ type smartlist struct {
 	rules              string
 }
 
+type beatData struct {
+	sampleRate      float64
+	defaultBeatgrid []marker
+	adjBeatgrid     []marker
+}
+
+type marker struct {
+	offset     float64
+	beatNumber int64
+	numBeats   uint32
+}
+
 func logError(err error) {
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
-// qUncompress uncompresses a uInt32-appended byte slice using zlib
+// qUncompress uncompresses a uInt32-appended byte slice using zlib,
 // used for blobs compressed with the QT C++ library's qCompress function
 func qUncompress(file []byte) ([]byte, error) {
 	uncompressLength := binary.BigEndian.Uint32(file[:4])
@@ -116,4 +128,14 @@ func qUncompress(file []byte) ([]byte, error) {
 		return fileDecomp, nil
 	}
 
+}
+
+// InitDB initializes the Engine SQL database at a given path
+func InitDB(path string) (*sql.DB, *sql.DB) {
+	m, err := sql.Open("sqlite3", path+"m.db")
+	logError(err)
+	hm, err := sql.Open("sqlite3", path+"hm.db")
+	logError(err)
+
+	return m, hm
 }
