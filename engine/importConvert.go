@@ -49,6 +49,20 @@ func beatDataFromBlob(blob []byte) beatData {
 	return beatData
 }
 
+func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
+	var grid []db.Marker
+	for i := range len(enGrid) - 1 {
+		var marker db.Marker
+		marker.StartPosition = enGrid[i].offset / sampleRate
+		lenMarker := enGrid[i+1].offset - enGrid[i].offset
+		marker.Bpm = sampleRate * 60 * float64(enGrid[i].numBeats) / lenMarker
+		marker.BeatNumber = int(enGrid[i].beatNumber) % 4
+		grid = append(grid, marker)
+	}
+
+	return grid
+}
+
 // unused
 func importConvertSong(song SongNull) db.Song {
 	return db.Song{
@@ -96,7 +110,7 @@ func importConvertSongHistory(historyList []HistoryListEntity) []SongHistory {
 	return SongHistoryData
 }
 
-func ImportConvertGrid() {
+func ImportConvertPerformanceData(performanceDataEntry PerformanceDataEntry) {
 	beatDataComp, err := os.ReadFile("tmp/beatData")
 	logError(err)
 
@@ -106,5 +120,6 @@ func ImportConvertGrid() {
 	fmt.Println(beatDataBlob)
 
 	beatData := beatDataFromBlob(beatDataBlob)
-	fmt.Println(beatData)
+	fmt.Println(gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid))
+	fmt.Println(gridFromBeatData(beatData.sampleRate, beatData.defaultBeatgrid))
 }
