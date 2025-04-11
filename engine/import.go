@@ -2,9 +2,11 @@ package engine
 
 import (
 	"os"
+
+	"github.com/nateranda/djtools/db"
 )
 
-func DLBeatData(perfData PerformanceDataEntry) {
+func DLBeatData(perfData performanceDataEntry) {
 	err := os.WriteFile("tmp/trackData", perfData.trackData, 0644)
 	logError(err)
 	err = os.WriteFile("tmp/beatData", perfData.beatData, 0644)
@@ -15,8 +17,8 @@ func DLBeatData(perfData PerformanceDataEntry) {
 	logError(err)
 }
 
-func ImportExtract(path string) (Library, error) {
-	var Library Library
+func ImportExtract(path string) (library, error) {
+	var Library library
 
 	m, hm := InitDB(path)
 	Library.songs = importExtractTrack(m)
@@ -27,4 +29,10 @@ func ImportExtract(path string) (Library, error) {
 	Library.smartlistList = importExtractSmartlist(m)
 
 	return Library, nil
+}
+
+func ImportConvert(enLibrary library) (db.Library, error) {
+	var library db.Library
+	library.Songs = importConvertSongList(enLibrary.songs)
+	return library, nil
 }

@@ -13,51 +13,51 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Library struct {
-	songs              []SongNull
-	historyList        []HistoryListEntity
-	perfData           []PerformanceDataEntry
+type library struct {
+	songs              []songNull
+	historyList        []historyListEntity
+	perfData           []performanceDataEntry
 	playlists          []playlist
 	playlistEntityList []playlistEntity
 	smartlistList      []smartlist
 }
 
-type SongNull struct {
-	SongID    sql.NullInt64
-	Title     sql.NullString
-	Artist    sql.NullString
-	Composer  sql.NullString
-	Album     sql.NullString
-	Genre     sql.NullString
-	Filetype  sql.NullString
-	Size      sql.NullInt64
-	Length    sql.NullFloat64
-	Year      sql.NullInt64
-	Bpm       sql.NullFloat64
-	DateAdded sql.NullTime
-	Bitrate   sql.NullInt64
-	Comment   sql.NullString
-	Rating    sql.NullInt64
-	Path      sql.NullString
-	Remixer   sql.NullString
-	Key       sql.NullString
-	Label     sql.NullString
+type songNull struct {
+	id        sql.NullInt64
+	title     sql.NullString
+	artist    sql.NullString
+	composer  sql.NullString
+	album     sql.NullString
+	genre     sql.NullString
+	filetype  sql.NullString
+	size      sql.NullInt64
+	length    sql.NullFloat64
+	year      sql.NullInt64
+	bpm       sql.NullFloat64
+	dateAdded sql.NullTime
+	bitrate   sql.NullInt64
+	comment   sql.NullString
+	rating    sql.NullInt64
+	path      sql.NullString
+	remixer   sql.NullString
+	key       sql.NullString
+	label     sql.NullString
 }
 
-type HistoryListEntity struct {
-	trackId   int
+type historyListEntity struct {
+	id        int
 	startTime time.Time
 }
 
 // unused
-type SongHistory struct {
-	songID     int
+type songHistory struct {
+	id         int
 	plays      int
 	lastPlayed int
 }
 
-type PerformanceDataEntry struct {
-	trackId   int
+type performanceDataEntry struct {
+	id        int
 	trackData []byte
 	beatData  []byte
 	quickCues []byte
@@ -65,7 +65,7 @@ type PerformanceDataEntry struct {
 }
 
 type playlist struct {
-	playlistId   int
+	id           int
 	title        string
 	parentListId int
 	nextListId   int

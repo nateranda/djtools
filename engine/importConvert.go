@@ -63,54 +63,61 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
 	return grid
 }
 
-// unused
-func importConvertSong(song SongNull) db.Song {
+func importConvertSong(song songNull) db.Song {
 	return db.Song{
-		SongID:    int(song.SongID.Int64),
-		Title:     song.Title.String,
-		Artist:    song.Artist.String,
-		Composer:  song.Composer.String,
-		Album:     song.Album.String,
-		Genre:     song.Genre.String,
-		Filetype:  song.Filetype.String,
-		Size:      int(song.Size.Int64),
-		Length:    float32(song.Length.Float64),
-		Year:      int(song.Year.Int64),
-		Bpm:       float32(song.Bpm.Float64),
-		DateAdded: int(song.DateAdded.Time.Unix()),
-		Bitrate:   int(song.Bitrate.Int64),
-		Comment:   song.Comment.String,
-		Rating:    int(song.Rating.Int64),
-		Path:      song.Path.String,
-		Remixer:   song.Remixer.String,
-		Key:       song.Key.String,
-		Label:     song.Label.String,
+		SongID:    int(song.id.Int64),
+		Title:     song.title.String,
+		Artist:    song.artist.String,
+		Composer:  song.composer.String,
+		Album:     song.album.String,
+		Genre:     song.genre.String,
+		Filetype:  song.filetype.String,
+		Size:      int(song.size.Int64),
+		Length:    float32(song.length.Float64),
+		Year:      int(song.year.Int64),
+		Bpm:       float32(song.bpm.Float64),
+		DateAdded: int(song.dateAdded.Time.Unix()),
+		Bitrate:   int(song.bitrate.Int64),
+		Comment:   song.comment.String,
+		Rating:    int(song.rating.Int64),
+		Path:      song.path.String,
+		Remixer:   song.remixer.String,
+		Key:       song.key.String,
+		Label:     song.label.String,
 	}
 }
 
+func importConvertSongList(songsNull []songNull) []db.Song {
+	var songs []db.Song
+	for _, song := range songsNull {
+		songs = append(songs, importConvertSong(song))
+	}
+	return songs
+}
+
 // unused
-func importConvertSongHistory(historyList []HistoryListEntity) []SongHistory {
+func importConvertSongHistory(historyList []historyListEntity) []songHistory {
 	var songId int
 	var lastPlayed int
 	plays := 1
 
-	var SongHistoryData []SongHistory
+	var SongHistoryData []songHistory
 
 	for i, HistoryListEntity := range historyList {
-		if HistoryListEntity.trackId > songId && i != 0 {
-			SongHistoryData = append(SongHistoryData, SongHistory{songId, plays, lastPlayed})
+		if HistoryListEntity.id > songId && i != 0 {
+			SongHistoryData = append(SongHistoryData, songHistory{songId, plays, lastPlayed})
 			plays = 0
 		}
-		songId = HistoryListEntity.trackId
+		songId = HistoryListEntity.id
 		lastPlayed = int(HistoryListEntity.startTime.Unix())
 		plays += 1
 	}
-	SongHistoryData = append(SongHistoryData, SongHistory{songId, plays, lastPlayed})
+	SongHistoryData = append(SongHistoryData, songHistory{songId, plays, lastPlayed})
 
 	return SongHistoryData
 }
 
-func ImportConvertPerformanceData(performanceDataEntry PerformanceDataEntry) {
+func ImportConvertPerformanceData(performanceDataEntry performanceDataEntry) {
 	beatDataComp, err := os.ReadFile("tmp/beatData")
 	logError(err)
 

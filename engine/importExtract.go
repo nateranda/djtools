@@ -4,8 +4,8 @@ import (
 	"database/sql"
 )
 
-func importExtractTrack(db *sql.DB) []SongNull {
-	var songs []SongNull
+func importExtractTrack(db *sql.DB) []songNull {
+	var songs []songNull
 
 	query := `SELECT id, title, artist, composer,
 		album, genre, fileType, fileBytes,
@@ -19,27 +19,27 @@ func importExtractTrack(db *sql.DB) []SongNull {
 	defer r.Close()
 
 	for r.Next() {
-		song := SongNull{}
+		song := songNull{}
 		err := r.Scan(
-			&song.SongID,
-			&song.Title,
-			&song.Artist,
-			&song.Composer,
-			&song.Album,
-			&song.Genre,
-			&song.Filetype,
-			&song.Size,
-			&song.Length,
-			&song.Year,
-			&song.Bpm,
-			&song.DateAdded,
-			&song.Bitrate,
-			&song.Comment,
-			&song.Rating,
-			&song.Path,
-			&song.Remixer,
-			&song.Key,
-			&song.Label,
+			&song.id,
+			&song.title,
+			&song.artist,
+			&song.composer,
+			&song.album,
+			&song.genre,
+			&song.filetype,
+			&song.size,
+			&song.length,
+			&song.year,
+			&song.bpm,
+			&song.dateAdded,
+			&song.bitrate,
+			&song.comment,
+			&song.rating,
+			&song.path,
+			&song.remixer,
+			&song.key,
+			&song.label,
 		)
 		logError(err)
 		songs = append(songs, song)
@@ -48,20 +48,20 @@ func importExtractTrack(db *sql.DB) []SongNull {
 	return songs
 }
 
-func importExtractHistory(db *sql.DB) []HistoryListEntity {
+func importExtractHistory(db *sql.DB) []historyListEntity {
 	query := `SELECT Track.originTrackId, HistorylistEntity.startTime
 		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
 		ORDER BY originTrackId, startTime`
 
-	var historyList []HistoryListEntity
+	var historyList []historyListEntity
 
 	r, err := db.Query(query)
 	logError(err)
 	defer r.Close()
 
 	for r.Next() {
-		HistoryListEntity := HistoryListEntity{}
-		err := r.Scan(&HistoryListEntity.trackId, &HistoryListEntity.startTime)
+		HistoryListEntity := historyListEntity{}
+		err := r.Scan(&HistoryListEntity.id, &HistoryListEntity.startTime)
 		logError(err)
 		historyList = append(historyList, HistoryListEntity)
 	}
@@ -69,18 +69,18 @@ func importExtractHistory(db *sql.DB) []HistoryListEntity {
 	return historyList
 }
 
-func ImportExtractPerformanceData(db *sql.DB) []PerformanceDataEntry {
+func ImportExtractPerformanceData(db *sql.DB) []performanceDataEntry {
 	query := `SELECT trackId, trackData, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
-	var perfDataList []PerformanceDataEntry
+	var perfDataList []performanceDataEntry
 
 	r, err := db.Query(query)
 	logError(err)
 	defer r.Close()
 
 	for r.Next() {
-		var perfData PerformanceDataEntry
-		err := r.Scan(&perfData.trackId, &perfData.trackData, &perfData.beatData, &perfData.quickCues, &perfData.loops)
+		var perfData performanceDataEntry
+		err := r.Scan(&perfData.id, &perfData.trackData, &perfData.beatData, &perfData.quickCues, &perfData.loops)
 		logError(err)
 		perfDataList = append(perfDataList, perfData)
 	}
@@ -99,7 +99,7 @@ func importExtractPlaylist(db *sql.DB) []playlist {
 
 	for r.Next() {
 		var playlist playlist
-		err := r.Scan(&playlist.playlistId, &playlist.title, &playlist.parentListId, &playlist.nextListId)
+		err := r.Scan(&playlist.id, &playlist.title, &playlist.parentListId, &playlist.nextListId)
 		logError(err)
 		playlists = append(playlists, playlist)
 	}
