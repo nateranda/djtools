@@ -70,7 +70,7 @@ func importExtractHistory(db *sql.DB) []historyListEntity {
 }
 
 func ImportExtractPerformanceData(db *sql.DB) []performanceDataEntry {
-	query := `SELECT trackId, trackData, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
+	query := `SELECT trackId, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
 	var perfDataList []performanceDataEntry
 
@@ -80,7 +80,7 @@ func ImportExtractPerformanceData(db *sql.DB) []performanceDataEntry {
 
 	for r.Next() {
 		var perfData performanceDataEntry
-		err := r.Scan(&perfData.id, &perfData.trackDataBlob, &perfData.beatDataBlob, &perfData.quickCuesBlob, &perfData.loopsBlob)
+		err := r.Scan(&perfData.id, &perfData.beatDataBlob, &perfData.quickCuesBlob, &perfData.loopsBlob)
 		logError(err)
 		perfDataList = append(perfDataList, perfData)
 	}

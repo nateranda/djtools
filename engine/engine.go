@@ -59,7 +59,6 @@ type songHistory struct {
 
 type performanceDataEntry struct {
 	id            int
-	trackDataBlob []byte
 	beatDataBlob  []byte
 	quickCuesBlob []byte
 	loopsBlob     []byte
