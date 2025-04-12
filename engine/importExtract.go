@@ -144,3 +144,17 @@ func importExtractSmartlist(db *sql.DB) []smartlist {
 
 	return smartlistList
 }
+
+func ImportExtract(path string) (library, error) {
+	var Library library
+
+	m, hm := InitDB(path)
+	Library.songs = importExtractTrack(m)
+	Library.historyList = importExtractHistory(hm)
+	Library.perfData = ImportExtractPerformanceData(m)
+	Library.playlists = importExtractPlaylist(m)
+	Library.playlistEntityList = importExtractPlaylistEntity(m)
+	Library.smartlistList = importExtractSmartlist(m)
+
+	return Library, nil
+}

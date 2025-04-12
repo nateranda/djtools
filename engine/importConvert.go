@@ -206,3 +206,9 @@ func ImportConvertPerformanceData(perfData []performanceDataEntry) {
 		fmt.Printf("loops: %v\n", loops)
 	}
 }
+
+func ImportConvert(enLibrary library) (db.Library, error) {
+	var library db.Library
+	library.Songs = importConvertSongList(enLibrary.songs)
+	return library, nil
+}
