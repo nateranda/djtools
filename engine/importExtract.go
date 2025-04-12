@@ -11,7 +11,7 @@ func importExtractTrack(db *sql.DB) []songNull {
 		album, genre, fileType, fileBytes,
 		length, year, bpm, dateAdded,
 		bitrate, comment, rating, path,
-		remixer, key, label
+		remixer, key, label, lastEditTime
 		FROM Track ORDER BY id`
 
 	r, err := db.Query(query)
@@ -40,6 +40,7 @@ func importExtractTrack(db *sql.DB) []songNull {
 			&song.remixer,
 			&song.key,
 			&song.label,
+			&song.lastEditTime,
 		)
 		logError(err)
 		songs = append(songs, song)
@@ -69,7 +70,7 @@ func importExtractHistory(db *sql.DB) []historyListEntity {
 	return historyList
 }
 
-func ImportExtractPerformanceData(db *sql.DB) []performanceDataEntry {
+func importExtractPerformanceData(db *sql.DB) []performanceDataEntry {
 	query := `SELECT trackId, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
 	var perfDataList []performanceDataEntry
@@ -145,13 +146,13 @@ func importExtractSmartlist(db *sql.DB) []smartlist {
 	return smartlistList
 }
 
-func ImportExtract(path string) (library, error) {
+func importExtract(path string) (library, error) {
 	var Library library
 
-	m, hm := InitDB(path)
+	m, hm := initDB(path)
 	Library.songs = importExtractTrack(m)
 	Library.historyList = importExtractHistory(hm)
-	Library.perfData = ImportExtractPerformanceData(m)
+	Library.perfData = importExtractPerformanceData(m)
 	Library.playlists = importExtractPlaylist(m)
 	Library.playlistEntityList = importExtractPlaylistEntity(m)
 	Library.smartlistList = importExtractSmartlist(m)

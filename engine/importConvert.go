@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/binary"
-	"fmt"
 	"math"
 
 	"github.com/nateranda/djtools/db"
@@ -92,9 +91,9 @@ func cuesFromBlob(sampleRate float64, blob []byte) cueData {
 		cueData.cues = append(cueData.cues, cue)
 	}
 
-	cueData.cueModified = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+	cueData.cueModified = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
 	i += 9
-	cueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+	cueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
 
 	return cueData
 }
@@ -134,40 +133,8 @@ func loopsFromBlob(sampleRate float64, blob []byte) []db.Loop {
 	return loops
 }
 
-func importConvertSong(song songNull) db.Song {
-	return db.Song{
-		SongID:    int(song.id.Int64),
-		Title:     song.title.String,
-		Artist:    song.artist.String,
-		Composer:  song.composer.String,
-		Album:     song.album.String,
-		Genre:     song.genre.String,
-		Filetype:  song.filetype.String,
-		Size:      int(song.size.Int64),
-		Length:    float32(song.length.Float64),
-		Year:      int(song.year.Int64),
-		Bpm:       float32(song.bpm.Float64),
-		DateAdded: int(song.dateAdded.Time.Unix()),
-		Bitrate:   int(song.bitrate.Int64),
-		Comment:   song.comment.String,
-		Rating:    int(song.rating.Int64),
-		Path:      song.path.String,
-		Remixer:   song.remixer.String,
-		Key:       song.key.String,
-		Label:     song.label.String,
-	}
-}
-
-func importConvertSongList(songsNull []songNull) []db.Song {
-	var songs []db.Song
-	for _, song := range songsNull {
-		songs = append(songs, importConvertSong(song))
-	}
-	return songs
-}
-
 // unused
-func importConvertSongHistory(historyList []historyListEntity) []songHistory {
+func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
 	var songId int
 	var lastPlayed int
 	plays := 1
@@ -188,27 +155,75 @@ func importConvertSongHistory(historyList []historyListEntity) []songHistory {
 	return SongHistoryData
 }
 
-func ImportConvertPerformanceData(perfData []performanceDataEntry) {
+func importConvertSong(library *db.Library, songsNull []songNull) {
+	for _, song := range songsNull {
+		library.Songs = append(library.Songs, db.Song{
+			SongID:       int(song.id.Int64),
+			Title:        song.title.String,
+			Artist:       song.artist.String,
+			Composer:     song.composer.String,
+			Album:        song.album.String,
+			Genre:        song.genre.String,
+			Filetype:     song.filetype.String,
+			Size:         int(song.size.Int64),
+			Length:       float32(song.length.Float64),
+			Year:         int(song.year.Int64),
+			Bpm:          float32(song.bpm.Float64),
+			DateAdded:    int(song.dateAdded.Time.Unix()),
+			DateModified: int(song.lastEditTime.Time.Unix()),
+			Bitrate:      int(song.bitrate.Int64),
+			Comment:      song.comment.String,
+			Rating:       int(song.rating.Int64),
+			Path:         song.path.String,
+			Remixer:      song.remixer.String,
+			Key:          song.key.String,
+			Label:        song.label.String,
+		})
+	}
+}
+
+func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry) {
 	for _, perfDataEntry := range perfData {
+		song, err := db.GetSong(library.Songs, perfDataEntry.id)
+		logError(err)
+
 		beatDataBlob, err := qUncompress(perfDataEntry.beatDataBlob)
 		logError(err)
 		beatData := beatDataFromBlob(beatDataBlob)
 
-		grid := gridFromBeatData(beatData.sampleRate, beatData.defaultBeatgrid)
-		fmt.Printf("grid: %v\n", grid)
+		song.SampleRate = beatData.sampleRate
+
+		song.Grid = gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid)
 
 		quickCuesBlob, err := qUncompress(perfDataEntry.quickCuesBlob)
 		logError(err)
 		cueData := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
+		song.Cue = cueData.cueModified
+		song.Cues = cueData.cues
 
-		fmt.Printf("cueData: %v\n", cueData)
-		loops := loopsFromBlob(beatData.sampleRate, perfDataEntry.loopsBlob)
-		fmt.Printf("loops: %v\n", loops)
+		song.Loops = loopsFromBlob(beatData.sampleRate, perfDataEntry.loopsBlob)
 	}
 }
 
-func ImportConvert(enLibrary library) (db.Library, error) {
+func importConvertHistory(library *db.Library, historyList []historyListEntity) {
+	songHistoryData := songHistoryFromHistoryList(historyList)
+
+	for _, songHistoryDataEntry := range songHistoryData {
+		//fmt.Println(songHistoryDataEntry.id)
+		song, err := db.GetSong(library.Songs, songHistoryDataEntry.id)
+		// ignore any entries that don't match existing songs
+		if err != nil {
+			continue
+		}
+		song.PlayCount = songHistoryDataEntry.plays
+		song.LastPlayed = songHistoryDataEntry.lastPlayed
+	}
+}
+
+func importConvert(enLibrary library) (db.Library, error) {
 	var library db.Library
-	library.Songs = importConvertSongList(enLibrary.songs)
+	importConvertSong(&library, enLibrary.songs)
+	importConvertPerformanceData(&library, enLibrary.perfData)
+	importConvertHistory(&library, enLibrary.historyList)
 	return library, nil
 }

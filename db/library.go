@@ -1,7 +1,7 @@
 package db
 
 import (
-	"errors"
+	"fmt"
 	"log"
 )
 
@@ -89,33 +89,33 @@ type Library struct {
 }
 
 // getSong takes a Song slice and returns a pointer to the Song with the given id
-func getSong(songList []Song, id int) (*Song, error) {
+func GetSong(songList []Song, id int) (*Song, error) {
 	for i := range songList {
 		if songList[i].SongID == id {
 			return &songList[i], nil
 		}
 	}
-	return nil, errors.New("did not find a Song with the given id")
+	return nil, fmt.Errorf("NotFoundError: did not find a Song matching %d", id)
 }
 
 // getPlaylist takes a Song slice and returns a pointer to the Song with the given id
-func getPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
+func GetPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
 	for i := range playlistList {
 		if playlistList[i].PlaylistID == id {
 			return &playlistList[i], nil
 		}
 	}
-	return nil, errors.New("did not find a Playlist with the given id")
+	return nil, fmt.Errorf("NotFoundError: did not find a Playlist matching %d", id)
 }
 
-// getSong takes a Song slice and returns a pointer to the Song with the given id
-func getFolder(folderList []Folder, id int) (*Folder, error) {
+// getFolder takes a Song slice and returns a pointer to the Song with the given id
+func GetFolder(folderList []Folder, id int) (*Folder, error) {
 	for i := range folderList {
 		if folderList[i].FolderID == id {
 			return &folderList[i], nil
 		}
 	}
-	return nil, errors.New("did not find a Song with the given id")
+	return nil, fmt.Errorf("NotFoundError: did not find a Folder matching %d", id)
 }
 
 func TestLibrary() Library {

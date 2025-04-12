@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/nateranda/djtools/engine"
@@ -14,8 +15,7 @@ func logError(err error) {
 }
 
 func main() {
-	m, _ := engine.InitDB("databases/engine/")
-	perfData := engine.ImportExtractPerformanceData(m)
-	//engine.DLBeatData(perfData[8])
-	engine.ImportConvertPerformanceData(perfData)
+	library, err := engine.Import("./databases/engine/")
+	logError(err)
+	fmt.Printf("song: %v\n", library.Songs[0])
 }

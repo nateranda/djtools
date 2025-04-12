@@ -24,25 +24,26 @@ type library struct {
 }
 
 type songNull struct {
-	id        sql.NullInt64
-	title     sql.NullString
-	artist    sql.NullString
-	composer  sql.NullString
-	album     sql.NullString
-	genre     sql.NullString
-	filetype  sql.NullString
-	size      sql.NullInt64
-	length    sql.NullFloat64
-	year      sql.NullInt64
-	bpm       sql.NullFloat64
-	dateAdded sql.NullTime
-	bitrate   sql.NullInt64
-	comment   sql.NullString
-	rating    sql.NullInt64
-	path      sql.NullString
-	remixer   sql.NullString
-	key       sql.NullString
-	label     sql.NullString
+	id           sql.NullInt64
+	title        sql.NullString
+	artist       sql.NullString
+	composer     sql.NullString
+	album        sql.NullString
+	genre        sql.NullString
+	filetype     sql.NullString
+	size         sql.NullInt64
+	length       sql.NullFloat64
+	year         sql.NullInt64
+	bpm          sql.NullFloat64
+	dateAdded    sql.NullTime
+	bitrate      sql.NullInt64
+	comment      sql.NullString
+	rating       sql.NullInt64
+	path         sql.NullString
+	remixer      sql.NullString
+	key          sql.NullString
+	label        sql.NullString
+	lastEditTime sql.NullTime
 }
 
 type historyListEntity struct {
@@ -137,11 +138,23 @@ func qUncompress(file []byte) ([]byte, error) {
 }
 
 // InitDB initializes the Engine SQL database at a given path
-func InitDB(path string) (*sql.DB, *sql.DB) {
+func initDB(path string) (*sql.DB, *sql.DB) {
 	m, err := sql.Open("sqlite3", path+"m.db")
 	logError(err)
 	hm, err := sql.Open("sqlite3", path+"hm.db")
 	logError(err)
 
 	return m, hm
+}
+
+func Import(path string) (db.Library, error) {
+	enLibrary, err := importExtract(path)
+	if err != nil {
+		return db.Library{}, err
+	}
+	library, err := importConvert(enLibrary)
+	if err != nil {
+		return db.Library{}, err
+	}
+	return library, nil
 }
