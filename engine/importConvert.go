@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"os"
 
 	"github.com/nateranda/djtools/db"
 )
@@ -28,7 +27,7 @@ func beatDataFromBlob(blob []byte) beatData {
 		marker.beatNumber = int64(binary.LittleEndian.Uint64(blob[i : i+8]))
 		i += 8
 		marker.numBeats = binary.LittleEndian.Uint32(blob[i : i+4])
-		i += 8
+		i += 8 // skip past unknown int32, not needed
 		beatData.defaultBeatgrid = append(beatData.defaultBeatgrid, marker)
 	}
 
@@ -42,7 +41,7 @@ func beatDataFromBlob(blob []byte) beatData {
 		marker.beatNumber = int64(binary.LittleEndian.Uint64(blob[i : i+8]))
 		i += 8
 		marker.numBeats = binary.LittleEndian.Uint32(blob[i : i+4])
-		i += 8
+		i += 8 // skip past unknown int32, not needed
 		beatData.adjBeatgrid = append(beatData.adjBeatgrid, marker)
 	}
 
@@ -61,6 +60,43 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
 	}
 
 	return grid
+}
+
+func cuesFromBlob(sampleRate float64, blob []byte) cueData {
+	var cueData cueData
+	i := 8 //byte index, skipping number of cues (always 8)
+	for pos := range 8 {
+		labelLength := int(blob[i])
+		if labelLength == 0 { // label length 0 means no cue at this position
+			i += 13
+			continue
+		}
+		i++
+		var cue db.HotCue
+		cue.Position = pos + 1
+		cue.Name = string(blob[i : i+labelLength])
+		i += labelLength
+		offsetSamples := math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+		i += 8
+		cue.Offset = offsetSamples / sampleRate
+		i++ // skip alpha channel (always 255)
+		r := int(blob[i])
+		i++
+		g := int(blob[i])
+		i++
+		b := int(blob[i])
+		i++
+		color, err := db.RgbToHex(r, g, b)
+		logError(err)
+		cue.Color = color
+		cueData.cues = append(cueData.cues, cue)
+	}
+
+	cueData.cueModified = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+	i += 9
+	cueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+
+	return cueData
 }
 
 func importConvertSong(song songNull) db.Song {
@@ -117,16 +153,14 @@ func importConvertSongHistory(historyList []historyListEntity) []songHistory {
 	return SongHistoryData
 }
 
-func ImportConvertPerformanceData(performanceDataEntry performanceDataEntry) {
-	beatDataComp, err := os.ReadFile("tmp/beatData")
-	logError(err)
-
-	beatDataBlob, err := qUncompress(beatDataComp)
-	logError(err)
-
-	fmt.Println(beatDataBlob)
-
-	beatData := beatDataFromBlob(beatDataBlob)
-	fmt.Println(gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid))
-	fmt.Println(gridFromBeatData(beatData.sampleRate, beatData.defaultBeatgrid))
+func ImportConvertPerformanceData(perfData []performanceDataEntry) {
+	for _, perfDataEntry := range perfData {
+		beatDataBlob, err := qUncompress(perfDataEntry.beatDataBlob)
+		logError(err)
+		beatData := beatDataFromBlob(beatDataBlob)
+		quickCuesBlob, err := qUncompress(perfDataEntry.quickCuesBlob)
+		logError(err)
+		cueData := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
+		fmt.Println(cueData)
+	}
 }

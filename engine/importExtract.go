@@ -80,7 +80,7 @@ func ImportExtractPerformanceData(db *sql.DB) []performanceDataEntry {
 
 	for r.Next() {
 		var perfData performanceDataEntry
-		err := r.Scan(&perfData.id, &perfData.trackData, &perfData.beatData, &perfData.quickCues, &perfData.loops)
+		err := r.Scan(&perfData.id, &perfData.trackDataBlob, &perfData.beatDataBlob, &perfData.quickCuesBlob, &perfData.loopsBlob)
 		logError(err)
 		perfDataList = append(perfDataList, perfData)
 	}

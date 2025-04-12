@@ -11,6 +11,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/nateranda/djtools/db"
 )
 
 type library struct {
@@ -57,11 +58,11 @@ type songHistory struct {
 }
 
 type performanceDataEntry struct {
-	id        int
-	trackData []byte
-	beatData  []byte
-	quickCues []byte
-	loops     []byte
+	id            int
+	trackDataBlob []byte
+	beatDataBlob  []byte
+	quickCuesBlob []byte
+	loopsBlob     []byte
 }
 
 type playlist struct {
@@ -90,6 +91,12 @@ type beatData struct {
 	sampleRate      float64
 	defaultBeatgrid []marker
 	adjBeatgrid     []marker
+}
+
+type cueData struct {
+	cues        []db.HotCue
+	cueOriginal float64
+	cueModified float64
 }
 
 type marker struct {

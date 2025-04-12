@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fmt"
+	"errors"
 	"log"
 )
 
@@ -19,10 +19,11 @@ type Marker struct {
 	BeatNumber    int
 }
 
-type Cue struct {
+type HotCue struct {
 	Name     string
 	Offset   float64
 	Position int
+	Color    string
 }
 
 type Loop struct {
@@ -60,8 +61,9 @@ type Song struct {
 	Label        string
 	Mix          string
 	Color        string
+	Cue          float64
 	Grid         []Marker
-	Cues         []Cue
+	Cues         []HotCue
 	Loops        []Loop
 }
 
@@ -92,7 +94,7 @@ func getSong(songList []Song, id int) (*Song, error) {
 			return &songList[i], nil
 		}
 	}
-	return nil, fmt.Errorf("did not find a Song with the given id")
+	return nil, errors.New("did not find a Song with the given id")
 }
 
 // getPlaylist takes a Song slice and returns a pointer to the Song with the given id
@@ -102,7 +104,7 @@ func getPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
 			return &playlistList[i], nil
 		}
 	}
-	return nil, fmt.Errorf("did not find a Playlist with the given id")
+	return nil, errors.New("did not find a Playlist with the given id")
 }
 
 // getSong takes a Song slice and returns a pointer to the Song with the given id
@@ -112,7 +114,7 @@ func getFolder(folderList []Folder, id int) (*Folder, error) {
 			return &folderList[i], nil
 		}
 	}
-	return nil, fmt.Errorf("did not find a Song with the given id")
+	return nil, errors.New("did not find a Song with the given id")
 }
 
 func TestLibrary() Library {
