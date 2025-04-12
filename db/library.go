@@ -28,9 +28,10 @@ type HotCue struct {
 
 type Loop struct {
 	Name     string
-	Offset   float64
-	Length   int
+	Start    float64
+	End      float64
 	Position int
+	Color    string
 }
 
 type Song struct {

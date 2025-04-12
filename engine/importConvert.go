@@ -65,6 +65,7 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
 func cuesFromBlob(sampleRate float64, blob []byte) cueData {
 	var cueData cueData
 	i := 8 //byte index, skipping number of cues (always 8)
+	// skip unset cues
 	for pos := range 8 {
 		labelLength := int(blob[i])
 		if labelLength == 0 { // label length 0 means no cue at this position
@@ -76,9 +77,8 @@ func cuesFromBlob(sampleRate float64, blob []byte) cueData {
 		cue.Position = pos + 1
 		cue.Name = string(blob[i : i+labelLength])
 		i += labelLength
-		offsetSamples := math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
+		cue.Offset = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
 		i += 8
-		cue.Offset = offsetSamples / sampleRate
 		i++ // skip alpha channel (always 255)
 		r := int(blob[i])
 		i++
@@ -97,6 +97,41 @@ func cuesFromBlob(sampleRate float64, blob []byte) cueData {
 	cueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i : i+8]))
 
 	return cueData
+}
+
+func loopsFromBlob(sampleRate float64, blob []byte) []db.Loop {
+	var loops []db.Loop
+	i := 8 //byte index, skipping number of loops (always 8)
+	for pos := range 8 {
+		labelLength := int(blob[i])
+		// skip unset loops
+		if labelLength == 0 { // label length 0 means no loop at this position
+			i += 23
+			continue
+		}
+		i++
+		var loop db.Loop
+		loop.Position = pos + 1
+		loop.Name = string(blob[i : i+labelLength])
+		i += labelLength
+		loop.Start = math.Float64frombits(binary.LittleEndian.Uint64(blob[i:i+8])) / sampleRate
+		i += 8
+		loop.End = math.Float64frombits(binary.LittleEndian.Uint64(blob[i:i+8])) / sampleRate
+		i += 8
+		i += 3 // skip alpha channel (always 255) and set bytes (not needed)
+		r := int(blob[i])
+		i++
+		g := int(blob[i])
+		i++
+		b := int(blob[i])
+		i++
+		color, err := db.RgbToHex(r, g, b)
+		logError(err)
+		loop.Color = color
+		loops = append(loops, loop)
+	}
+
+	return loops
 }
 
 func importConvertSong(song songNull) db.Song {
@@ -158,9 +193,16 @@ func ImportConvertPerformanceData(perfData []performanceDataEntry) {
 		beatDataBlob, err := qUncompress(perfDataEntry.beatDataBlob)
 		logError(err)
 		beatData := beatDataFromBlob(beatDataBlob)
+
+		grid := gridFromBeatData(beatData.sampleRate, beatData.defaultBeatgrid)
+		fmt.Printf("grid: %v\n", grid)
+
 		quickCuesBlob, err := qUncompress(perfDataEntry.quickCuesBlob)
 		logError(err)
 		cueData := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
-		fmt.Println(cueData)
+
+		fmt.Printf("cueData: %v\n", cueData)
+		loops := loopsFromBlob(beatData.sampleRate, perfDataEntry.loopsBlob)
+		fmt.Printf("loops: %v\n", loops)
 	}
 }
