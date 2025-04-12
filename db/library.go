@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 )
 
 // unused
@@ -98,7 +97,7 @@ func GetSong(songList []Song, id int) (*Song, error) {
 	return nil, fmt.Errorf("NotFoundError: did not find a Song matching %d", id)
 }
 
-// getPlaylist takes a Song slice and returns a pointer to the Song with the given id
+// getPlaylist takes a Playlist slice and returns a pointer to the Playlist with the given id
 func GetPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
 	for i := range playlistList {
 		if playlistList[i].PlaylistID == id {
@@ -108,7 +107,7 @@ func GetPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
 	return nil, fmt.Errorf("NotFoundError: did not find a Playlist matching %d", id)
 }
 
-// getFolder takes a Song slice and returns a pointer to the Song with the given id
+// getFolder takes a Folder slice and returns a pointer to the Folder with the given id
 func GetFolder(folderList []Folder, id int) (*Folder, error) {
 	for i := range folderList {
 		if folderList[i].FolderID == id {
@@ -131,25 +130,4 @@ func TestLibrary() Library {
 	folders := []Folder{{FolderID: 1, Name: "folder1", Position: 1, Playlists: []*Playlist{&playlists[0], &playlists[1]}}}
 
 	return Library{songs, playlists, folders}
-}
-
-func logError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// TBI
-func Validate(library Library) (bool, string, error) {
-	return true, "", nil
-}
-
-// TBI
-func Import(program string, path string, options ImportOptions) (Library, error) {
-	return Library{}, nil
-}
-
-// TBI
-func Export(library Library, program string, path string, options ExportOptions) error {
-	return nil
 }

@@ -6,14 +6,13 @@ djtools/
 ├─ lib/
 │  ├─ lib.go -> shared functions (if needed)
 ├─ db/
-│  ├─ db.go -> library struct, shared database functions
+│  ├─ library.go -> library struct, shared library functions
+│  ├─ lib.go -> shared general functions
 │  ├─ validate.go -> library validation
 ├─ [program]/
 │  ├─ [program].go -> import/export framework, raw data structs, shared functions
-│  ├─ import.go -> import framework
-│  ├─ import[step].go -> step-specific import stuff (if needed)
-│  ├─ export.go -> export framework
-│  ├─ export[step].go -> step-specific export stuff (if needed)
+│  ├─ import[step].go -> import functions (step-specific if necessary)
+│  ├─ export[step].go -> export functions (step-specific if necessary)
 ├─ cli/
 │  ├─ cli.go -> cli logic
 ├─ main.go -> cli endpoint, dev testing

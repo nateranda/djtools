@@ -1,10 +1,17 @@
-package db
+package djtools
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+func logError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func InitLibrary() {
 	db, err := sql.Open("sqlite3", "./library.db")
