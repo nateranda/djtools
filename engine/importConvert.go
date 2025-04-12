@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/binary"
 	"math"
+	"path/filepath"
 
 	"github.com/nateranda/djtools/db"
 )
@@ -133,7 +134,6 @@ func loopsFromBlob(sampleRate float64, blob []byte) []db.Loop {
 	return loops
 }
 
-// unused
 func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
 	var songId int
 	var lastPlayed int
@@ -155,8 +155,19 @@ func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
 	return SongHistoryData
 }
 
-func importConvertSong(library *db.Library, songsNull []songNull) {
+func fullPathFromRelativePath(basePath string, relativePath string) (string, error) {
+	fullPath := filepath.Join(basePath, relativePath)
+	absolutePath, err := filepath.Abs(fullPath)
+	if err != nil {
+		return "", err
+	}
+	return absolutePath, nil
+}
+
+func importConvertSong(library *db.Library, songsNull []songNull, path string) {
 	for _, song := range songsNull {
+		path, err := fullPathFromRelativePath(path, song.path.String)
+		logError(err)
 		library.Songs = append(library.Songs, db.Song{
 			SongID:       int(song.id.Int64),
 			Title:        song.title.String,
@@ -174,7 +185,7 @@ func importConvertSong(library *db.Library, songsNull []songNull) {
 			Bitrate:      int(song.bitrate.Int64),
 			Comment:      song.comment.String,
 			Rating:       int(song.rating.Int64),
-			Path:         song.path.String,
+			Path:         path,
 			Remixer:      song.remixer.String,
 			Key:          song.key.String,
 			Label:        song.label.String,
@@ -220,9 +231,9 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 	}
 }
 
-func importConvert(enLibrary library) (db.Library, error) {
+func importConvert(enLibrary library, path string) (db.Library, error) {
 	var library db.Library
-	importConvertSong(&library, enLibrary.songs)
+	importConvertSong(&library, enLibrary.songs, path)
 	importConvertPerformanceData(&library, enLibrary.perfData)
 	importConvertHistory(&library, enLibrary.historyList)
 	return library, nil

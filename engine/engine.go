@@ -152,7 +152,7 @@ func Import(path string) (db.Library, error) {
 	if err != nil {
 		return db.Library{}, err
 	}
-	library, err := importConvert(enLibrary)
+	library, err := importConvert(enLibrary, path)
 	if err != nil {
 		return db.Library{}, err
 	}
