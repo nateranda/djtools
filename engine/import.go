@@ -7,9 +7,7 @@ import (
 )
 
 func DLBeatData(perfData performanceDataEntry) {
-	err := os.WriteFile("tmp/trackData", perfData.trackDataBlob, 0644)
-	logError(err)
-	err = os.WriteFile("tmp/beatData", perfData.beatDataBlob, 0644)
+	err := os.WriteFile("tmp/beatData", perfData.beatDataBlob, 0644)
 	logError(err)
 	err = os.WriteFile("tmp/quickCues", perfData.quickCuesBlob, 0644)
 	logError(err)
