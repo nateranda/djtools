@@ -166,7 +166,7 @@ func fullPathFromRelativePath(basePath string, relativePath string) (string, err
 
 func importConvertSong(library *db.Library, songsNull []songNull, path string) {
 	for _, song := range songsNull {
-		path, err := fullPathFromRelativePath(path, song.path.String)
+		songPath, err := fullPathFromRelativePath(path, song.path.String)
 		logError(err)
 		library.Songs = append(library.Songs, db.Song{
 			SongID:       int(song.id.Int64),
@@ -185,7 +185,7 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string) {
 			Bitrate:      int(song.bitrate.Int64),
 			Comment:      song.comment.String,
 			Rating:       int(song.rating.Int64),
-			Path:         path,
+			Path:         songPath,
 			Remixer:      song.remixer.String,
 			Key:          song.key.String,
 			Label:        song.label.String,
