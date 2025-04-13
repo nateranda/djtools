@@ -233,7 +233,25 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 		song, err := db.GetSong(library.Songs, perfDataEntry.id)
 		logError(err)
 
-		beatDataBlob, err := qUncompress(perfDataEntry.beatDataBlob)
+		beatDataBlobComp := perfDataEntry.beatDataBlob
+		if beatDataBlobComp == nil {
+			fmt.Printf("Corrupt beatData blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
+			continue
+		}
+
+		quickCuesBlobComp := perfDataEntry.quickCuesBlob
+		if quickCuesBlobComp == nil {
+			fmt.Printf("Corrupt quickCues blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
+			continue
+		}
+
+		loopsBlob := perfDataEntry.loopsBlob
+		if loopsBlob == nil {
+			fmt.Printf("Corrupt loops blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
+			continue
+		}
+
+		beatDataBlob, err := qUncompress(beatDataBlobComp)
 		logError(err)
 		beatData := beatDataFromBlob(beatDataBlob)
 
@@ -241,13 +259,13 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 
 		song.Grid = gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid)
 
-		quickCuesBlob, err := qUncompress(perfDataEntry.quickCuesBlob)
+		quickCuesBlob, err := qUncompress(quickCuesBlobComp)
 		logError(err)
 		cueData := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
 		song.Cue = cueData.cueModified
 		song.Cues = cueData.cues
 
-		song.Loops = loopsFromBlob(beatData.sampleRate, perfDataEntry.loopsBlob)
+		song.Loops = loopsFromBlob(beatData.sampleRate, loopsBlob)
 	}
 }
 
