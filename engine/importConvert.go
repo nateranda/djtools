@@ -210,22 +210,42 @@ func findFirstPlaylist(playlists []playlist) (int, error) {
 	return 0, fmt.Errorf("NotFoundError: did not find the first playlist")
 }
 
-func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity) {
+func sortPlaylists(playlists []playlist) ([]playlist, error) {
+	i, err := findFirstPlaylist(playlists)
+	if err != nil {
+		return []playlist{}, fmt.Errorf("Error sorting playlist: %v", err)
+	}
+
+	playlistMap := make(map[int]int)
+	for i, playlist := range playlists {
+		playlistMap[playlist.id] = i
+	}
+	var playlistsSorted []playlist
+	for range playlists {
+		playlistsSorted = append(playlistsSorted, playlists[playlistMap[i]])
+		i = playlists[playlistMap[i]].nextListId
+	}
+	return playlistsSorted, nil
+}
+
+func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity, playlists []playlist) []playlist {
+	playlistMap := make(map[int]int)
+	for i, playlist := range playlists {
+		playlistMap[playlist.id] = i
+	}
+
 	songMap := make(map[int]int)
 	for i, song := range library.Songs {
 		songMap[song.SongID] = i
 	}
 
-	playlistMap := make(map[int]int)
-	for i, playlist := range library.Playlists {
-		playlistMap[playlist.PlaylistID] = i
-	}
-
 	for _, playlistEntity := range playlistEntityList {
 		trackId := playlistEntity.trackId
 		listId := playlistEntity.listId
-		library.Playlists[playlistMap[listId]].Songs = append(library.Playlists[playlistMap[listId]].Songs, &library.Songs[songMap[trackId]])
+		playlists[playlistMap[listId]].songs = append(playlists[playlistMap[listId]].songs, &library.Songs[songMap[trackId]])
 	}
+
+	return playlists
 }
 
 func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry) {
@@ -285,23 +305,93 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 }
 
 func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) {
-	playlistMap := make(map[int]playlist)
+	playlists = populatePlaylists(library, playlistEntityList, playlists)
+	fmt.Println(playlists)
+
+	parentPlaylistAddressMap := make(map[int]*db.Playlist)
+
+	var parentPlaylists []playlist
+	var playlistsNew []playlist
+
+	// find parent playlists
 	for _, playlist := range playlists {
-		playlistMap[playlist.id] = playlist
+		if playlist.parentListId == 0 {
+			parentPlaylists = append(parentPlaylists, playlist)
+		} else {
+			playlistsNew = append(playlistsNew, playlist)
+		}
 	}
-	id, err := findFirstPlaylist(playlists)
+	// sort parent playlists
+	parentPlaylists, err := sortPlaylists(parentPlaylists)
 	logError(err)
 
-	for i := range playlists {
-		var playlist db.Playlist
-		playlist.PlaylistID = playlistMap[id].id
-		playlist.Name = playlistMap[id].title
-		playlist.Position = i + 1
-		library.Playlists = append(library.Playlists, playlist)
-		id = playlistMap[id].nextListId
+	// move parent playlists to Library
+	for i, playlist := range parentPlaylists {
+		newPlaylist := db.Playlist{
+			Name:       playlist.title,
+			PlaylistID: playlist.id,
+			Position:   i,
+			Songs:      playlist.songs,
+		}
+
+		library.Playlists = append(library.Playlists, newPlaylist)
+		fmt.Printf("playlist name: %v, address: %p\n", library.Playlists[0].Name, &library.Playlists[0])
+
+		// add new pointer(s) to map
+		for i, playlist := range library.Playlists {
+			parentPlaylistAddressMap[playlist.PlaylistID] = &library.Playlists[i]
+		}
 	}
 
-	populatePlaylists(library, playlistEntityList)
+	// remove parent playlists from playlists
+	playlists = playlistsNew
+
+	// iterate over child playlists until no child playlists left
+	for len(playlists) > 0 {
+		var parentPlaylistsNew []playlist
+		var playlistsNew []playlist
+
+		// generate map of parent playlists
+		parentPlaylistIdMap := make(map[int]struct{})
+		for _, playlist := range parentPlaylists {
+			parentPlaylistIdMap[playlist.id] = struct{}{}
+		}
+
+		// find playlists whose parent was moved in the last round
+		for _, playlist := range playlists {
+			if _, exists := parentPlaylistIdMap[playlist.parentListId]; exists {
+				parentPlaylistsNew = append(parentPlaylistsNew, playlist)
+			} else {
+				playlistsNew = append(playlistsNew, playlist)
+			}
+		}
+
+		// sort new 'parent' playlists
+		parentPlaylistsNew, err := sortPlaylists(parentPlaylistsNew)
+		logError(err)
+
+		// move new 'parent' playlists to library
+		for i, playlist := range parentPlaylistsNew {
+			newPlaylist := db.Playlist{
+				Name:       playlist.title,
+				PlaylistID: playlist.id,
+				Position:   i,
+				Songs:      playlist.songs,
+			}
+			parentPlaylist := parentPlaylistAddressMap[playlist.parentListId]
+			fmt.Printf("%p\n", parentPlaylist)
+			parentPlaylist.SubPlaylists = append(parentPlaylist.SubPlaylists, newPlaylist)
+
+			// add new pointer(s) to map
+			for i, playlist := range parentPlaylist.SubPlaylists {
+				parentPlaylistAddressMap[playlist.PlaylistID] = &parentPlaylist.SubPlaylists[i]
+			}
+		}
+
+		// reset playlists and parentPlaylists with new slices
+		playlists = playlistsNew
+		parentPlaylists = parentPlaylistsNew
+	}
 }
 
 func importConvert(enLibrary library, path string) (db.Library, error) {
