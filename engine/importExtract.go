@@ -2,9 +2,10 @@ package engine
 
 import (
 	"database/sql"
+	"fmt"
 )
 
-func importExtractTrack(db *sql.DB) []songNull {
+func importExtractTrack(db *sql.DB) ([]songNull, error) {
 	var songs []songNull
 
 	query := `SELECT id, title, artist, composer,
@@ -15,7 +16,9 @@ func importExtractTrack(db *sql.DB) []songNull {
 		FROM Track ORDER BY id`
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting tracks: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
@@ -42,14 +45,16 @@ func importExtractTrack(db *sql.DB) []songNull {
 			&song.label,
 			&song.lastEditTime,
 		)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting tracks: %v", err)
+		}
 		songs = append(songs, song)
 	}
 
-	return songs
+	return songs, nil
 }
 
-func importExtractHistory(db *sql.DB) []historyListEntity {
+func importExtractHistory(db *sql.DB) ([]historyListEntity, error) {
 	query := `SELECT Track.originTrackId, HistorylistEntity.startTime
 		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
 		ORDER BY originTrackId, startTime`
@@ -57,105 +62,149 @@ func importExtractHistory(db *sql.DB) []historyListEntity {
 	var historyList []historyListEntity
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting track history: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
 		HistoryListEntity := historyListEntity{}
 		err := r.Scan(&HistoryListEntity.id, &HistoryListEntity.startTime)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting track history: %v", err)
+		}
 		historyList = append(historyList, HistoryListEntity)
 	}
 
-	return historyList
+	return historyList, nil
 }
 
-func importExtractPerformanceData(db *sql.DB) []performanceDataEntry {
+func importExtractPerformanceData(db *sql.DB) ([]performanceDataEntry, error) {
 	query := `SELECT trackId, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
 	var perfDataList []performanceDataEntry
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting performance data: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
 		var perfData performanceDataEntry
 		err := r.Scan(&perfData.id, &perfData.beatDataBlob, &perfData.quickCuesBlob, &perfData.loopsBlob)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting performance data: %v", err)
+		}
 		perfDataList = append(perfDataList, perfData)
 	}
 
-	return perfDataList
+	return perfDataList, nil
 }
 
-func importExtractPlaylist(db *sql.DB) []playlist {
+func importExtractPlaylist(db *sql.DB) ([]playlist, error) {
 	query := `SELECT id, title, parentListId, nextListId FROM Playlist ORDER BY id`
 
 	var playlists []playlist
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting playlists: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
 		var playlist playlist
 		err := r.Scan(&playlist.id, &playlist.title, &playlist.parentListId, &playlist.nextListId)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting playlists: %v", err)
+		}
 		playlists = append(playlists, playlist)
 	}
 
-	return playlists
+	return playlists, nil
 }
 
-func importExtractPlaylistEntity(db *sql.DB) []playlistEntity {
+func importExtractPlaylistEntity(db *sql.DB) ([]playlistEntity, error) {
 	query := `SELECT listId, trackId, nextEntityId FROM PlaylistEntity ORDER BY trackId`
 
 	var playlistEntityList []playlistEntity
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting playlist entities: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
 		var playlistEntity playlistEntity
 		err := r.Scan(&playlistEntity.listId, &playlistEntity.trackId, &playlistEntity.nextEntityId)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting playlist entities: %v", err)
+		}
 		playlistEntityList = append(playlistEntityList, playlistEntity)
 	}
 
-	return playlistEntityList
+	return playlistEntityList, nil
 }
 
-func importExtractSmartlist(db *sql.DB) []smartlist {
+func importExtractSmartlist(db *sql.DB) ([]smartlist, error) {
 	query := `SELECT listUuid, title, parentPlaylistPath, nextPlaylistPath, nextListUuid, rules FROM Smartlist ORDER BY listUuid`
 
 	var smartlistList []smartlist
 
 	r, err := db.Query(query)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error extracting smartlists: %v", err)
+	}
 	defer r.Close()
 
 	for r.Next() {
 		var smartlist smartlist
 		err := r.Scan(&smartlist.listUuid, &smartlist.title, &smartlist.parentPlaylistPath, &smartlist.nextPlaylistPath, &smartlist.nextListUuid, &smartlist.rules)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting smartlists: %v", err)
+		}
 		smartlistList = append(smartlistList, smartlist)
 	}
 
-	return smartlistList
+	return smartlistList, nil
 }
 
 func importExtract(path string) (library, error) {
-	var Library library
-
+	var enLibrary library
+	var err error
 	m, hm := initDB(path)
-	Library.songs = importExtractTrack(m)
-	Library.historyList = importExtractHistory(hm)
-	Library.perfData = importExtractPerformanceData(m)
-	Library.playlists = importExtractPlaylist(m)
-	Library.playlistEntityList = importExtractPlaylistEntity(m)
-	Library.smartlistList = importExtractSmartlist(m)
 
-	return Library, nil
+	enLibrary.songs, err = importExtractTrack(m)
+	if err != nil {
+		return library{}, err
+	}
+
+	enLibrary.historyList, err = importExtractHistory(hm)
+	if err != nil {
+		return library{}, err
+	}
+
+	enLibrary.perfData, err = importExtractPerformanceData(m)
+	if err != nil {
+		return library{}, err
+	}
+
+	enLibrary.playlists, err = importExtractPlaylist(m)
+	if err != nil {
+		return library{}, err
+	}
+
+	enLibrary.playlistEntityList, err = importExtractPlaylistEntity(m)
+	if err != nil {
+		return library{}, err
+	}
+
+	enLibrary.smartlistList, err = importExtractSmartlist(m)
+	if err != nil {
+		return library{}, err
+	}
+
+	return enLibrary, nil
 }

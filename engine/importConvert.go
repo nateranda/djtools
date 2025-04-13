@@ -213,7 +213,7 @@ func findFirstPlaylist(playlists []playlist) (int, error) {
 func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	i, err := findFirstPlaylist(playlists)
 	if err != nil {
-		return []playlist{}, fmt.Errorf("Error sorting playlist: %v", err)
+		return []playlist{}, fmt.Errorf("error sorting playlist: %v", err)
 	}
 
 	playlistMap := make(map[int]int)
@@ -306,7 +306,6 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 
 func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) {
 	playlists = populatePlaylists(library, playlistEntityList, playlists)
-	fmt.Println(playlists)
 
 	parentPlaylistAddressMap := make(map[int]*db.Playlist)
 
@@ -335,7 +334,6 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 		}
 
 		library.Playlists = append(library.Playlists, newPlaylist)
-		fmt.Printf("playlist name: %v, address: %p\n", library.Playlists[0].Name, &library.Playlists[0])
 
 		// add new pointer(s) to map
 		for i, playlist := range library.Playlists {
@@ -379,7 +377,6 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 				Songs:      playlist.songs,
 			}
 			parentPlaylist := parentPlaylistAddressMap[playlist.parentListId]
-			fmt.Printf("%p\n", parentPlaylist)
 			parentPlaylist.SubPlaylists = append(parentPlaylist.SubPlaylists, newPlaylist)
 
 			// add new pointer(s) to map
