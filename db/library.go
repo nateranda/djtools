@@ -68,23 +68,16 @@ type Song struct {
 }
 
 type Playlist struct {
-	PlaylistID int
-	Position   int
-	Name       string
-	Songs      []*Song
-}
-
-type Folder struct {
-	FolderID  int
-	Name      string
-	Position  int
-	Playlists []*Playlist
+	PlaylistID   int
+	Position     int
+	Name         string
+	Songs        []*Song
+	SubPlaylists []Playlist
 }
 
 type Library struct {
 	Songs     []Song
 	Playlists []Playlist
-	Folders   []Folder
 }
 
 // getSong takes a Song slice and returns a pointer to the Song with the given id
@@ -95,39 +88,4 @@ func GetSong(songList []Song, id int) (*Song, error) {
 		}
 	}
 	return nil, fmt.Errorf("NotFoundError: did not find a Song matching %d", id)
-}
-
-// getPlaylist takes a Playlist slice and returns a pointer to the Playlist with the given id
-func GetPlaylist(playlistList []Playlist, id int) (*Playlist, error) {
-	for i := range playlistList {
-		if playlistList[i].PlaylistID == id {
-			return &playlistList[i], nil
-		}
-	}
-	return nil, fmt.Errorf("NotFoundError: did not find a Playlist matching %d", id)
-}
-
-// getFolder takes a Folder slice and returns a pointer to the Folder with the given id
-func GetFolder(folderList []Folder, id int) (*Folder, error) {
-	for i := range folderList {
-		if folderList[i].FolderID == id {
-			return &folderList[i], nil
-		}
-	}
-	return nil, fmt.Errorf("NotFoundError: did not find a Folder matching %d", id)
-}
-
-func TestLibrary() Library {
-	songs := []Song{
-		{SongID: 1, Title: "test1", Artist: "artist1"},
-		{SongID: 2, Title: "test2", Artist: "artist2"},
-		{SongID: 3, Title: "test3", Artist: "artist3"},
-	}
-	playlists := []Playlist{
-		{PlaylistID: 1, Position: 1, Name: "playlist1", Songs: []*Song{&songs[0], &songs[1], &songs[2]}},
-		{PlaylistID: 2, Position: 2, Name: "playlist2", Songs: []*Song{&songs[0], &songs[1]}},
-	}
-	folders := []Folder{{FolderID: 1, Name: "folder1", Position: 1, Playlists: []*Playlist{&playlists[0], &playlists[1]}}}
-
-	return Library{songs, playlists, folders}
 }

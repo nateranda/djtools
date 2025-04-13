@@ -51,7 +51,6 @@ type historyListEntity struct {
 	startTime time.Time
 }
 
-// unused
 type songHistory struct {
 	id         int
 	plays      int
