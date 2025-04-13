@@ -17,5 +17,7 @@ func logError(err error) {
 func main() {
 	library, err := engine.Import("/Users/nateranda/Music/Engine Library/Database2/")
 	logError(err)
-	fmt.Printf("song: %v\n", library.Songs[0])
+	for _, song := range library.Playlists[2].Songs {
+		fmt.Println(song.Title)
+	}
 }

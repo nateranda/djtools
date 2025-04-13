@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 	"path/filepath"
 
@@ -231,10 +232,67 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 	}
 }
 
+func findFirstPlaylist(playlists []playlist) (int, error) {
+	nextListIdSet := make(map[int]struct{})
+	for _, playlist := range playlists {
+		if playlist.nextListId != 0 {
+			nextListIdSet[playlist.nextListId] = struct{}{}
+		}
+	}
+
+	for _, playlist := range playlists {
+		if _, exists := nextListIdSet[playlist.id]; !exists {
+			return playlist.id, nil
+		}
+	}
+	return 0, fmt.Errorf("NotFoundError: did not find the first playlist")
+}
+
+func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity) {
+	songMap := make(map[int]int)
+	for i, song := range library.Songs {
+		songMap[song.SongID] = i
+	}
+
+	playlistMap := make(map[int]int)
+	for i, playlist := range library.Playlists {
+		playlistMap[playlist.PlaylistID] = i
+	}
+
+	for _, playlistEntity := range playlistEntityList {
+		trackId := playlistEntity.trackId
+		listId := playlistEntity.listId
+		library.Playlists[playlistMap[listId]].Songs = append(library.Playlists[playlistMap[listId]].Songs, &library.Songs[songMap[trackId]])
+	}
+}
+
+func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) {
+	playlistMap := make(map[int]playlist)
+	for _, playlist := range playlists {
+		playlistMap[playlist.id] = playlist
+	}
+	id, err := findFirstPlaylist(playlists)
+	logError(err)
+
+	for i := range playlists {
+		var playlist db.Playlist
+		playlist.PlaylistID = playlistMap[id].id
+		playlist.Name = playlistMap[id].title
+		playlist.Position = i + 1
+		library.Playlists = append(library.Playlists, playlist)
+		id = playlistMap[id].nextListId
+	}
+
+	populatePlaylists(library, playlistEntityList)
+
+	//fmt.Printf("library.Playlists: %v\n", library.Playlists)
+}
+
 func importConvert(enLibrary library, path string) (db.Library, error) {
 	var library db.Library
 	importConvertSong(&library, enLibrary.songs, path)
 	importConvertPerformanceData(&library, enLibrary.perfData)
 	importConvertHistory(&library, enLibrary.historyList)
+	importConvertPlaylist(&library, enLibrary.playlists, enLibrary.playlistEntityList)
 	return library, nil
 }
