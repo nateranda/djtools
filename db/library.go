@@ -63,7 +63,7 @@ type Playlist struct {
 	PlaylistID   int
 	Position     int
 	Name         string
-	Songs        []*Song
+	Songs        []int
 	SubPlaylists []Playlist
 }
 

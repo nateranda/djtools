@@ -75,7 +75,7 @@ type playlist struct {
 	title        string
 	parentListId int
 	nextListId   int
-	songs        []*db.Song
+	songs        []int
 }
 
 type playlistEntity struct {

@@ -235,21 +235,17 @@ func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	return playlistsSorted, nil
 }
 
-func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity, playlists []playlist) []playlist {
+// this currently does not order items in the playlist!
+func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist) []playlist {
 	playlistMap := make(map[int]int)
 	for i, playlist := range playlists {
 		playlistMap[playlist.id] = i
 	}
 
-	songMap := make(map[int]int)
-	for i, song := range library.Songs {
-		songMap[song.SongID] = i
-	}
-
 	for _, playlistEntity := range playlistEntityList {
 		trackId := playlistEntity.trackId
 		listId := playlistEntity.listId
-		playlists[playlistMap[listId]].songs = append(playlists[playlistMap[listId]].songs, &library.Songs[songMap[trackId]])
+		playlists[playlistMap[listId]].songs = append(playlists[playlistMap[listId]].songs, trackId)
 	}
 
 	return playlists
@@ -338,7 +334,7 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 }
 
 func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
-	playlists = populatePlaylists(library, playlistEntityList, playlists)
+	playlists = populatePlaylists(playlistEntityList, playlists)
 
 	parentPlaylistAddressMap := make(map[int]*db.Playlist)
 
