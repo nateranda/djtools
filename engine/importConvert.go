@@ -63,8 +63,8 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
 	return grid
 }
 
-func cuesFromBlob(sampleRate float64, blob []byte) cueData {
-	var cueData cueData
+func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
+	var blobCueData cueData
 	i := 8 //byte index, skipping number of cues (always 8)
 	// skip unset cues
 	for pos := range 8 {
@@ -88,19 +88,21 @@ func cuesFromBlob(sampleRate float64, blob []byte) cueData {
 		b := int(blob[i])
 		i++
 		color, err := db.RgbToHex(r, g, b)
-		logError(err)
+		if err != nil {
+			return cueData{}, fmt.Errorf("error extracting cues from cueData blob: %v", err)
+		}
 		cue.Color = color
-		cueData.cues = append(cueData.cues, cue)
+		blobCueData.cues = append(blobCueData.cues, cue)
 	}
 
-	cueData.cueModified = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
+	blobCueData.cueModified = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
 	i += 9
-	cueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
+	blobCueData.cueOriginal = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
 
-	return cueData
+	return blobCueData, nil
 }
 
-func loopsFromBlob(sampleRate float64, blob []byte) []db.Loop {
+func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 	var loops []db.Loop
 	i := 8 //byte index, skipping number of loops (always 8)
 	for pos := range 8 {
@@ -127,12 +129,14 @@ func loopsFromBlob(sampleRate float64, blob []byte) []db.Loop {
 		b := int(blob[i])
 		i++
 		color, err := db.RgbToHex(r, g, b)
-		logError(err)
+		if err != nil {
+			return nil, fmt.Errorf("error extracting loops from loops blob: %v", err)
+		}
 		loop.Color = color
 		loops = append(loops, loop)
 	}
 
-	return loops
+	return loops, nil
 }
 
 func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
@@ -165,10 +169,12 @@ func fullPathFromRelativePath(basePath string, relativePath string) (string, err
 	return absolutePath, nil
 }
 
-func importConvertSong(library *db.Library, songsNull []songNull, path string) {
+func importConvertSong(library *db.Library, songsNull []songNull, path string) error {
 	for _, song := range songsNull {
 		songPath, err := fullPathFromRelativePath(path, song.path.String)
-		logError(err)
+		if err != nil {
+			return fmt.Errorf("error converting songs: %v", err)
+		}
 		library.Songs = append(library.Songs, db.Song{
 			SongID:       int(song.id.Int64),
 			Title:        song.title.String,
@@ -192,6 +198,7 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string) {
 			Label:        song.label.String,
 		})
 	}
+	return nil
 }
 
 func findFirstPlaylist(playlists []playlist) (int, error) {
@@ -248,10 +255,12 @@ func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity,
 	return playlists
 }
 
-func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry) {
+func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry) error {
 	for _, perfDataEntry := range perfData {
 		song, err := db.GetSong(library.Songs, perfDataEntry.id)
-		logError(err)
+		if err != nil {
+			return fmt.Errorf("error converting performance data: %v", err)
+		}
 
 		beatDataBlobComp := perfDataEntry.beatDataBlob
 		if beatDataBlobComp == nil {
@@ -272,7 +281,9 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 		}
 
 		beatDataBlob, err := qUncompress(beatDataBlobComp)
-		logError(err)
+		if err != nil {
+			return err
+		}
 		beatData := beatDataFromBlob(beatDataBlob)
 
 		song.SampleRate = beatData.sampleRate
@@ -280,13 +291,22 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 		song.Grid = gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid)
 
 		quickCuesBlob, err := qUncompress(quickCuesBlobComp)
-		logError(err)
-		cueData := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
+		if err != nil {
+			return fmt.Errorf("error converting performance data: %v", err)
+		}
+		cueData, err := cuesFromBlob(beatData.sampleRate, quickCuesBlob)
+		if err != nil {
+			return err
+		}
 		song.Cue = cueData.cueModified
 		song.Cues = cueData.cues
 
-		song.Loops = loopsFromBlob(beatData.sampleRate, loopsBlob)
+		song.Loops, err = loopsFromBlob(beatData.sampleRate, loopsBlob)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func importConvertHistory(library *db.Library, historyList []historyListEntity) {
@@ -304,7 +324,7 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 	}
 }
 
-func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) {
+func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
 	playlists = populatePlaylists(library, playlistEntityList, playlists)
 
 	parentPlaylistAddressMap := make(map[int]*db.Playlist)
@@ -322,7 +342,9 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 	}
 	// sort parent playlists
 	parentPlaylists, err := sortPlaylists(parentPlaylists)
-	logError(err)
+	if err != nil {
+		return err
+	}
 
 	// move parent playlists to Library
 	for i, playlist := range parentPlaylists {
@@ -366,7 +388,9 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 
 		// sort new 'parent' playlists
 		parentPlaylistsNew, err := sortPlaylists(parentPlaylistsNew)
-		logError(err)
+		if err != nil {
+			return err
+		}
 
 		// move new 'parent' playlists to library
 		for i, playlist := range parentPlaylistsNew {
@@ -389,13 +413,24 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 		playlists = playlistsNew
 		parentPlaylists = parentPlaylistsNew
 	}
+	return nil
 }
 
 func importConvert(enLibrary library, path string) (db.Library, error) {
 	var library db.Library
-	importConvertSong(&library, enLibrary.songs, path)
-	importConvertPerformanceData(&library, enLibrary.perfData)
+	err := importConvertSong(&library, enLibrary.songs, path)
+	if err != nil {
+		return db.Library{}, err
+	}
+	err = importConvertPerformanceData(&library, enLibrary.perfData)
+	if err != nil {
+		return db.Library{}, err
+	}
 	importConvertHistory(&library, enLibrary.historyList)
-	importConvertPlaylist(&library, enLibrary.playlists, enLibrary.playlistEntityList)
+	err = importConvertPlaylist(&library, enLibrary.playlists, enLibrary.playlistEntityList)
+	if err != nil {
+		return db.Library{}, err
+	}
+
 	return library, nil
 }

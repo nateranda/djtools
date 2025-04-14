@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"time"
@@ -129,7 +130,7 @@ func qUncompress(file []byte) ([]byte, error) {
 
 	// check if the file's uncompressed length matches the header
 	if len(fileDecomp) != int(uncompressLength) {
-		err := errors.New("db: uncompressed file length does not match length header")
+		err := errors.New("uncompressed file length does not match length header")
 		return []byte{}, err
 	} else {
 		return fileDecomp, nil
@@ -138,13 +139,17 @@ func qUncompress(file []byte) ([]byte, error) {
 }
 
 // InitDB initializes the Engine SQL database at a given path
-func initDB(path string) (*sql.DB, *sql.DB) {
+func initDB(path string) (*sql.DB, *sql.DB, error) {
 	m, err := sql.Open("sqlite3", path+"m.db")
-	logError(err)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+	}
 	hm, err := sql.Open("sqlite3", path+"hm.db")
-	logError(err)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+	}
 
-	return m, hm
+	return m, hm, nil
 }
 
 func Import(path string) (db.Library, error) {

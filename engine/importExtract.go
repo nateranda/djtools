@@ -174,37 +174,34 @@ func importExtractSmartlist(db *sql.DB) ([]smartlist, error) {
 func importExtract(path string) (library, error) {
 	var enLibrary library
 	var err error
-	m, hm := initDB(path)
 
+	m, hm, err := initDB(path)
+	if err != nil {
+		return library{}, err
+	}
 	enLibrary.songs, err = importExtractTrack(m)
 	if err != nil {
 		return library{}, err
 	}
-
 	enLibrary.historyList, err = importExtractHistory(hm)
 	if err != nil {
 		return library{}, err
 	}
-
 	enLibrary.perfData, err = importExtractPerformanceData(m)
 	if err != nil {
 		return library{}, err
 	}
-
 	enLibrary.playlists, err = importExtractPlaylist(m)
 	if err != nil {
 		return library{}, err
 	}
-
 	enLibrary.playlistEntityList, err = importExtractPlaylistEntity(m)
 	if err != nil {
 		return library{}, err
 	}
-
 	enLibrary.smartlistList, err = importExtractSmartlist(m)
 	if err != nil {
 		return library{}, err
 	}
-
 	return enLibrary, nil
 }
