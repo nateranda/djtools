@@ -4,14 +4,6 @@ import (
 	"fmt"
 )
 
-// unused
-type ImportOptions struct {
-}
-
-// unused
-type ExportOptions struct {
-}
-
 type Marker struct {
 	StartPosition float64
 	Bpm           float64

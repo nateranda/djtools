@@ -15,6 +15,11 @@ import (
 	"github.com/nateranda/djtools/db"
 )
 
+type ImportOptions struct {
+	ImportOriginalGrids bool
+	ImportOriginalCues  bool
+}
+
 type library struct {
 	songs              []songNull
 	historyList        []historyListEntity
@@ -152,12 +157,12 @@ func initDB(path string) (*sql.DB, *sql.DB, error) {
 	return m, hm, nil
 }
 
-func Import(path string) (db.Library, error) {
+func Import(path string, importOptions ImportOptions) (db.Library, error) {
 	enLibrary, err := importExtract(path)
 	if err != nil {
 		return db.Library{}, err
 	}
-	library, err := importConvert(enLibrary, path)
+	library, err := importConvert(enLibrary, path, importOptions)
 	if err != nil {
 		return db.Library{}, err
 	}

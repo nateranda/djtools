@@ -255,7 +255,7 @@ func populatePlaylists(library *db.Library, playlistEntityList []playlistEntity,
 	return playlists
 }
 
-func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry) error {
+func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry, importOptions ImportOptions) error {
 	for _, perfDataEntry := range perfData {
 		song, err := db.GetSong(library.Songs, perfDataEntry.id)
 		if err != nil {
@@ -288,7 +288,14 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 
 		song.SampleRate = beatData.sampleRate
 
-		song.Grid = gridFromBeatData(beatData.sampleRate, beatData.adjBeatgrid)
+		var beatgrid []marker
+		if importOptions.ImportOriginalGrids {
+			beatgrid = beatData.defaultBeatgrid
+		} else {
+			beatgrid = beatData.adjBeatgrid
+		}
+
+		song.Grid = gridFromBeatData(beatData.sampleRate, beatgrid)
 
 		quickCuesBlob, err := qUncompress(quickCuesBlobComp)
 		if err != nil {
@@ -298,7 +305,13 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 		if err != nil {
 			return err
 		}
-		song.Cue = cueData.cueModified
+
+		if importOptions.ImportOriginalCues {
+			song.Cue = cueData.cueOriginal
+		} else {
+			song.Cue = cueData.cueModified
+		}
+
 		song.Cues = cueData.cues
 
 		song.Loops, err = loopsFromBlob(beatData.sampleRate, loopsBlob)
@@ -416,13 +429,13 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 	return nil
 }
 
-func importConvert(enLibrary library, path string) (db.Library, error) {
+func importConvert(enLibrary library, path string, importOptions ImportOptions) (db.Library, error) {
 	var library db.Library
 	err := importConvertSong(&library, enLibrary.songs, path)
 	if err != nil {
 		return db.Library{}, err
 	}
-	err = importConvertPerformanceData(&library, enLibrary.perfData)
+	err = importConvertPerformanceData(&library, enLibrary.perfData, importOptions)
 	if err != nil {
 		return db.Library{}, err
 	}
