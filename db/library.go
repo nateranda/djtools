@@ -1,5 +1,11 @@
 package db
 
+import (
+	"encoding/gob"
+	"fmt"
+	"os"
+)
+
 // Marker is a marker in a beatgrid.
 type Marker struct {
 	StartPosition float64 // start position in seconds
@@ -72,4 +78,34 @@ type Playlist struct {
 type Library struct {
 	Songs     []Song     // slice of Song structs, can be ordered
 	Playlists []Playlist // slice of Playlist structs in order
+}
+
+func Save(library *Library, path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("error saving library to file: %v", err)
+	}
+	defer file.Close()
+
+	encoder := gob.NewEncoder(file)
+	err = encoder.Encode(*library)
+	if err != nil {
+		return fmt.Errorf("error saving library to file: %v", err)
+	}
+	return nil
+}
+
+func Load(library *Library, path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error loading library from file: %v", err)
+	}
+	defer file.Close()
+
+	decoder := gob.NewDecoder(file)
+	err = decoder.Decode(library)
+	if err != nil {
+		return fmt.Errorf("error loading library from file: %v", err)
+	}
+	return nil
 }
