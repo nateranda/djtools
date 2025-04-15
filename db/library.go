@@ -61,7 +61,6 @@ type Song struct {
 
 type Playlist struct {
 	PlaylistID   int
-	Position     int
 	Name         string
 	Songs        []int
 	SubPlaylists []Playlist

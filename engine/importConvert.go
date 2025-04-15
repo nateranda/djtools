@@ -392,11 +392,10 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 	}
 
 	// move parent playlists to Library
-	for i, playlist := range parentPlaylists {
+	for _, playlist := range parentPlaylists {
 		newPlaylist := db.Playlist{
 			Name:       playlist.title,
 			PlaylistID: playlist.id,
-			Position:   i,
 			Songs:      playlist.songs,
 		}
 
@@ -438,11 +437,10 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 		}
 
 		// move new 'parent' playlists to library
-		for i, playlist := range parentPlaylistsNew {
+		for _, playlist := range parentPlaylistsNew {
 			newPlaylist := db.Playlist{
 				Name:       playlist.title,
 				PlaylistID: playlist.id,
-				Position:   i,
 				Songs:      playlist.songs,
 			}
 			parentPlaylist := parentPlaylistAddressMap[playlist.parentListId]
