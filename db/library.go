@@ -4,12 +4,14 @@ import (
 	"fmt"
 )
 
+// Marker is a marker in a beatgrid.
 type Marker struct {
 	StartPosition float64 // start position in seconds
 	Bpm           float64 // beats per minute
 	BeatNumber    int     // beat in measure to start on, 1-indexed, assumed 4/4
 }
 
+// HotCue is a saved hot cue for a song.
 type HotCue struct {
 	Name     string  // name of hot cue
 	Offset   float64 // offset of hot cue in seconds
@@ -17,6 +19,7 @@ type HotCue struct {
 	Color    string  // color of hot cue button, hex code
 }
 
+// Loop is a saved loop for a song.
 type Loop struct {
 	Name     string  // name of loop
 	Start    float64 // start time of loop, seconds
@@ -25,8 +28,9 @@ type Loop struct {
 	Color    string  // color of loop button, hex code
 }
 
+// Song is the metadata, analysis data, and saved cues/loops for a song.
 type Song struct {
-	SongID       int      // song ID used by software
+	SongID       int      // song id used by software
 	Title        string   // title
 	Artist       string   // artist
 	Composer     string   // composer
@@ -59,13 +63,16 @@ type Song struct {
 	Loops        []Loop   // slice of Loop structs out of order
 }
 
+// Playlist is a playlist of songs which can contain other playlists.
+// A folder is just a Playlist with no songs that contains other playlists.
 type Playlist struct {
 	PlaylistID   int        // playlist id used by software
 	Name         string     // name of playlist
-	Songs        []int      // slice of song IDs in order
+	Songs        []int      // slice of song ids in order
 	SubPlaylists []Playlist // slice of child playlists in order, can be recursive
 }
 
+// Library is the entire library of a DJ software.
 type Library struct {
 	Songs     []Song     // slice of Song structs, can be ordered
 	Playlists []Playlist // slice of Playlist structs in order
