@@ -42,7 +42,7 @@ func beatDataFromBlob(blob []byte) beatData {
 		marker.beatNumber = int64(binary.LittleEndian.Uint64(blob[i : i+8]))
 		i += 8
 		marker.numBeats = binary.LittleEndian.Uint32(blob[i : i+4])
-		i += 8 // skip past unknown int32, not needed
+		i += 8 // skip unknown int32, not needed
 		beatData.adjBeatgrid = append(beatData.adjBeatgrid, marker)
 	}
 
@@ -66,6 +66,7 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
 func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 	var blobCueData cueData
 	i := 8 //byte index, skipping number of cues (always 8)
+
 	// skip unset cues
 	for pos := range 8 {
 		labelLength := int(blob[i])
@@ -79,8 +80,7 @@ func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 		cue.Name = string(blob[i : i+labelLength])
 		i += labelLength
 		cue.Offset = math.Float64frombits(binary.BigEndian.Uint64(blob[i:i+8])) / sampleRate
-		i += 8
-		i++ // skip alpha channel (always 255)
+		i += 9 // skip 1-byte alpha channel (always 255)
 		r := int(blob[i])
 		i++
 		g := int(blob[i])
@@ -104,7 +104,7 @@ func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 
 func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 	var loops []db.Loop
-	i := 8 //byte index, skipping number of loops (always 8)
+	i := 8 // byte index, skipping number of loops (always 8)
 	for pos := range 8 {
 		labelLength := int(blob[i])
 		// skip unset loops
@@ -121,7 +121,7 @@ func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 		i += 8
 		loop.End = math.Float64frombits(binary.LittleEndian.Uint64(blob[i:i+8])) / sampleRate
 		i += 8
-		i += 3 // skip alpha channel (always 255) and set bytes (not needed)
+		i += 3 // skip 1-byte alpha channel (always 255) and set bytes (not needed)
 		r := int(blob[i])
 		i++
 		g := int(blob[i])
@@ -147,7 +147,8 @@ func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
 	var SongHistoryData []songHistory
 
 	for i, HistoryListEntity := range historyList {
-		if HistoryListEntity.id > songId && i != 0 {
+		// append data if there are no more entries matching id
+		if HistoryListEntity.id > songId && i != 0 { // assumes historyList is sorted by id
 			SongHistoryData = append(SongHistoryData, songHistory{songId, plays, lastPlayed})
 			plays = 0
 		}
@@ -160,6 +161,7 @@ func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
 	return SongHistoryData
 }
 
+// hard to test - platform-specific
 func fullPathFromRelativePath(basePath string, relativePath string) (string, error) {
 	fullPath := filepath.Join(basePath, relativePath)
 	absolutePath, err := filepath.Abs(fullPath)
@@ -202,43 +204,52 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string) e
 }
 
 func findFirstPlaylist(playlists []playlist) (int, error) {
-	nextListIdSet := make(map[int]struct{})
+	// map used for better performance
+	nextListIdMap := make(map[int]struct{}) // struct used because it takes up no data
 	for _, playlist := range playlists {
 		if playlist.nextListId != 0 {
-			nextListIdSet[playlist.nextListId] = struct{}{}
+			nextListIdMap[playlist.nextListId] = struct{}{}
 		}
 	}
 
+	// select the playlist that is not referred to by any other playlist's nextListId
 	for _, playlist := range playlists {
-		if _, exists := nextListIdSet[playlist.id]; !exists {
+		if _, exists := nextListIdMap[playlist.id]; !exists {
 			return playlist.id, nil
 		}
 	}
 	return 0, fmt.Errorf("NotFoundError: did not find the first playlist")
 }
 
-func findFirstSongs(playlistEntityList []playlistEntity) []playlistEntity {
+func findFirstSongs(playlistEntityList []playlistEntity) ([]playlistEntity, error) {
 	var firstSongs []playlistEntity
 
-	nextEntityIdMap := make(map[int]struct{})
+	// map used for better performance
+	nextEntityIdMap := make(map[int]struct{}) // struct used because it takes up no data
 	for _, playlistEntity := range playlistEntityList {
 		if playlistEntity.nextEntityId != 0 {
 			nextEntityIdMap[playlistEntity.nextEntityId] = struct{}{}
 		}
 	}
 
+	// select only the songs that are not referred to by any other track's nextEntityId
 	for _, playlistEntity := range playlistEntityList {
 		if _, exists := nextEntityIdMap[playlistEntity.id]; !exists {
 			firstSongs = append(firstSongs, playlistEntity)
 		}
 	}
-	return firstSongs
+
+	if firstSongs == nil {
+		return nil, fmt.Errorf("NotFoundError: did not find any first songs")
+	}
+
+	return firstSongs, nil
 }
 
 func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	i, err := findFirstPlaylist(playlists)
 	if err != nil {
-		return []playlist{}, fmt.Errorf("error sorting playlist: %v", err)
+		return nil, fmt.Errorf("error sorting playlist: %v", err)
 	}
 
 	playlistMap := make(map[int]int)
@@ -253,7 +264,7 @@ func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	return playlistsSorted, nil
 }
 
-func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist) []playlist {
+func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist) ([]playlist, error) {
 	playlistMap := make(map[int]int)
 	for i, playlist := range playlists {
 		playlistMap[playlist.id] = i
@@ -264,7 +275,10 @@ func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist
 		playlistEntityMap[playlistEntity.id] = &playlistEntity
 	}
 
-	firstSongs := findFirstSongs(playlistEntityList)
+	firstSongs, err := findFirstSongs(playlistEntityList)
+	if err != nil {
+		return nil, fmt.Errorf("error populating playlists: %v", err)
+	}
 
 	for _, track := range firstSongs {
 		// add first song
@@ -284,7 +298,7 @@ func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist
 		}
 	}
 
-	return playlists
+	return playlists, nil
 }
 
 func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry, importOptions ImportOptions) error {
@@ -358,9 +372,8 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 	songHistoryData := songHistoryFromHistoryList(historyList)
 
 	for _, songHistoryDataEntry := range songHistoryData {
-		//fmt.Println(songHistoryDataEntry.id)
 		song, err := db.GetSong(library.Songs, songHistoryDataEntry.id)
-		// ignore any entries that don't match existing songs
+		// ignore any entries for removed songs
 		if err != nil {
 			continue
 		}
@@ -370,7 +383,10 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 }
 
 func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
-	playlists = populatePlaylists(playlistEntityList, playlists)
+	playlists, err := populatePlaylists(playlistEntityList, playlists)
+	if err != nil {
+		return err
+	}
 
 	parentPlaylistAddressMap := make(map[int]*db.Playlist)
 
@@ -386,7 +402,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 		}
 	}
 	// sort parent playlists
-	parentPlaylists, err := sortPlaylists(parentPlaylists)
+	parentPlaylists, err = sortPlaylists(parentPlaylists)
 	if err != nil {
 		return err
 	}

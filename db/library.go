@@ -5,70 +5,70 @@ import (
 )
 
 type Marker struct {
-	StartPosition float64
-	Bpm           float64
-	BeatNumber    int
+	StartPosition float64 // start position in seconds
+	Bpm           float64 // beats per minute
+	BeatNumber    int     // beat in measure to start on, 1-indexed, assumed 4/4
 }
 
 type HotCue struct {
-	Name     string
-	Offset   float64
-	Position int
-	Color    string
+	Name     string  // name of hot cue
+	Offset   float64 // offset of hot cue in seconds
+	Position int     // position of hot cue, 1-indexed
+	Color    string  // color of hot cue button, hex code
 }
 
 type Loop struct {
-	Name     string
-	Start    float64
-	End      float64
-	Position int
-	Color    string
+	Name     string  // name of loop
+	Start    float64 // start time of loop, seconds
+	End      float64 // end time of loop, seconds
+	Position int     // position of loop, 1-indexed
+	Color    string  // color of loop button, hex code
 }
 
 type Song struct {
-	SongID       int
-	Title        string
-	Artist       string
-	Composer     string
-	Album        string
-	Grouping     string
-	Genre        string
-	Filetype     string
-	Size         int
-	Length       float32
-	TrackNumber  int
-	Year         int
-	Bpm          float32
-	DateModified int
-	DateAdded    int
-	Bitrate      int
-	SampleRate   float64
-	Comment      string
-	PlayCount    int
-	LastPlayed   int
-	Rating       int
-	Path         string
-	Remixer      string
-	Key          string
-	Label        string
-	Mix          string
-	Color        string
-	Cue          float64
-	Grid         []Marker
-	Cues         []HotCue
-	Loops        []Loop
+	SongID       int      // song ID used by software
+	Title        string   // title
+	Artist       string   // artist
+	Composer     string   // composer
+	Album        string   // album song is from
+	Grouping     string   // grouping
+	Genre        string   // genre
+	Filetype     string   // filetype, abbreviated
+	Size         int      // file size in bytes
+	Length       float32  // song length in seconds, approximate
+	TrackNumber  int      // number in album
+	Year         int      // release year
+	Bpm          float32  // beats per minute
+	DateModified int      // date last modified, unix
+	DateAdded    int      // date added to library, unix
+	Bitrate      int      // bitrate in kilobytes per second
+	SampleRate   float64  // sample rate in hertz
+	Comment      string   // comment
+	PlayCount    int      // play count
+	LastPlayed   int      // date last played, unix
+	Rating       int      // rating in multiples of 20: 0*=0, 1*=20... 5*=100
+	Path         string   // song absolute path
+	Remixer      string   // remixer
+	Key          string   // key in int representation of camelot, 0-indexed: 0=8B, 1=8A, 2=9B... 23=7A
+	Label        string   // label
+	Mix          string   // mix
+	Color        string   // color in hex code
+	Cue          float64  // cue locatin in seconds
+	Grid         []Marker // slice of Marker structs in order
+	Cues         []HotCue // slice of Cue structs out of order
+	Loops        []Loop   // slice of Loop structs out of order
 }
 
 type Playlist struct {
-	PlaylistID   int
-	Name         string
-	Songs        []int
-	SubPlaylists []Playlist
+	PlaylistID   int        // playlist id used by software
+	Name         string     // name of playlist
+	Songs        []int      // slice of song IDs in order
+	SubPlaylists []Playlist // slice of child playlists in order, can be recursive
 }
 
 type Library struct {
-	Songs     []Song
-	Playlists []Playlist
+	Songs     []Song     // slice of Song structs, can be ordered
+	Playlists []Playlist // slice of Playlist structs in order
 }
 
 // getSong takes a Song slice and returns a pointer to the Song with the given id

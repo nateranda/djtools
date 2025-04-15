@@ -8,13 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nateranda/djtools/db"
 )
 
+// ImportOptions contains the options used when importing an Engine library.
 type ImportOptions struct {
 	ImportOriginalGrids bool
 	ImportOriginalCues  bool
@@ -112,39 +112,36 @@ type marker struct {
 	numBeats   uint32
 }
 
-func logError(err error) {
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
 // qUncompress uncompresses a uInt32-appended byte slice using zlib,
-// used for blobs compressed with the QT C++ library's qCompress function
+// used for blobs compressed with the QT C++ library's qCompress function.
 func qUncompress(file []byte) ([]byte, error) {
 	uncompressLength := binary.BigEndian.Uint32(file[:4])
 	buffer := bytes.NewBuffer(file[4:])
 	r, err := zlib.NewReader(buffer)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error uncompressing file: %v", err)
+	}
 
 	defer r.Close()
 
 	var out bytes.Buffer
 	_, err = io.Copy(&out, r)
-	logError(err)
+	if err != nil {
+		return nil, fmt.Errorf("error uncompressing file: %v", err)
+	}
 
 	fileDecomp := out.Bytes()
 
 	// check if the file's uncompressed length matches the header
 	if len(fileDecomp) != int(uncompressLength) {
-		err := errors.New("uncompressed file length does not match length header")
-		return []byte{}, err
+		return []byte{}, errors.New("VerificationError: uncompressed file length does not match length header")
 	} else {
 		return fileDecomp, nil
 	}
 
 }
 
-// InitDB initializes the Engine SQL database at a given path
+// initDB initializes the Engine SQL database at a given path.
 func initDB(path string) (*sql.DB, *sql.DB, error) {
 	m, err := sql.Open("sqlite3", path+"m.db")
 	if err != nil {
@@ -158,6 +155,7 @@ func initDB(path string) (*sql.DB, *sql.DB, error) {
 	return m, hm, nil
 }
 
+// Import converts an Engine database into a djtools Library struct
 func Import(path string, importOptions ImportOptions) (db.Library, error) {
 	enLibrary, err := importExtract(path)
 	if err != nil {
