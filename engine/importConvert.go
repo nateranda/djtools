@@ -302,11 +302,13 @@ func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist
 }
 
 func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry, importOptions ImportOptions) error {
+	songMap := make(map[int]*db.Song)
+	for i, song := range library.Songs {
+		songMap[song.SongID] = &library.Songs[i]
+	}
+
 	for _, perfDataEntry := range perfData {
-		song, err := db.GetSong(library.Songs, perfDataEntry.id)
-		if err != nil {
-			return fmt.Errorf("error converting performance data: %v", err)
-		}
+		song := songMap[perfDataEntry.id]
 
 		beatDataBlobComp := perfDataEntry.beatDataBlob
 		if beatDataBlobComp == nil {
@@ -369,12 +371,17 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 }
 
 func importConvertHistory(library *db.Library, historyList []historyListEntity) {
+	songMap := make(map[int]*db.Song)
+	for i, song := range library.Songs {
+		songMap[song.SongID] = &library.Songs[i]
+	}
+
 	songHistoryData := songHistoryFromHistoryList(historyList)
 
 	for _, songHistoryDataEntry := range songHistoryData {
-		song, err := db.GetSong(library.Songs, songHistoryDataEntry.id)
+		song := songMap[songHistoryDataEntry.id]
 		// ignore any entries for removed songs
-		if err != nil {
+		if song == nil {
 			continue
 		}
 		song.PlayCount = songHistoryDataEntry.plays

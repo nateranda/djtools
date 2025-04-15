@@ -1,9 +1,5 @@
 package db
 
-import (
-	"fmt"
-)
-
 // Marker is a marker in a beatgrid.
 type Marker struct {
 	StartPosition float64 // start position in seconds
@@ -76,14 +72,4 @@ type Playlist struct {
 type Library struct {
 	Songs     []Song     // slice of Song structs, can be ordered
 	Playlists []Playlist // slice of Playlist structs in order
-}
-
-// getSong takes a Song slice and returns a pointer to the Song with the given id
-func GetSong(songList []Song, id int) (*Song, error) {
-	for i := range songList {
-		if songList[i].SongID == id {
-			return &songList[i], nil
-		}
-	}
-	return nil, fmt.Errorf("NotFoundError: did not find a Song matching %d", id)
 }
