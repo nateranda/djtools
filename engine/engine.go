@@ -79,6 +79,7 @@ type playlist struct {
 }
 
 type playlistEntity struct {
+	id           int
 	listId       int
 	trackId      int
 	nextEntityId int

@@ -217,6 +217,24 @@ func findFirstPlaylist(playlists []playlist) (int, error) {
 	return 0, fmt.Errorf("NotFoundError: did not find the first playlist")
 }
 
+func findFirstSongs(playlistEntityList []playlistEntity) []playlistEntity {
+	var firstSongs []playlistEntity
+
+	nextEntityIdMap := make(map[int]struct{})
+	for _, playlistEntity := range playlistEntityList {
+		if playlistEntity.nextEntityId != 0 {
+			nextEntityIdMap[playlistEntity.nextEntityId] = struct{}{}
+		}
+	}
+
+	for _, playlistEntity := range playlistEntityList {
+		if _, exists := nextEntityIdMap[playlistEntity.id]; !exists {
+			firstSongs = append(firstSongs, playlistEntity)
+		}
+	}
+	return firstSongs
+}
+
 func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	i, err := findFirstPlaylist(playlists)
 	if err != nil {
@@ -235,17 +253,35 @@ func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	return playlistsSorted, nil
 }
 
-// this currently does not order items in the playlist!
 func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist) []playlist {
 	playlistMap := make(map[int]int)
 	for i, playlist := range playlists {
 		playlistMap[playlist.id] = i
 	}
 
+	playlistEntityMap := make(map[int]*playlistEntity)
 	for _, playlistEntity := range playlistEntityList {
-		trackId := playlistEntity.trackId
-		listId := playlistEntity.listId
+		playlistEntityMap[playlistEntity.id] = &playlistEntity
+	}
+
+	firstSongs := findFirstSongs(playlistEntityList)
+
+	for _, track := range firstSongs {
+		// add first song
+		trackId := track.trackId
+		listId := track.listId
+		nextEntityId := track.nextEntityId
 		playlists[playlistMap[listId]].songs = append(playlists[playlistMap[listId]].songs, trackId)
+
+		// iterate through playlist, adding songs in order until last song
+		for range len(playlistEntityList) { // failsafe in case there is no last song
+			if nextEntityId == 0 {
+				break
+			}
+			trackId = playlistEntityMap[nextEntityId].trackId
+			nextEntityId = playlistEntityMap[nextEntityId].nextEntityId
+			playlists[playlistMap[listId]].songs = append(playlists[playlistMap[listId]].songs, trackId)
+		}
 	}
 
 	return playlists

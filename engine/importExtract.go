@@ -126,7 +126,7 @@ func importExtractPlaylist(db *sql.DB) ([]playlist, error) {
 }
 
 func importExtractPlaylistEntity(db *sql.DB) ([]playlistEntity, error) {
-	query := `SELECT listId, trackId, nextEntityId FROM PlaylistEntity ORDER BY trackId`
+	query := `SELECT id, listId, trackId, nextEntityId FROM PlaylistEntity ORDER BY listId`
 
 	var playlistEntityList []playlistEntity
 
@@ -138,7 +138,7 @@ func importExtractPlaylistEntity(db *sql.DB) ([]playlistEntity, error) {
 
 	for r.Next() {
 		var playlistEntity playlistEntity
-		err := r.Scan(&playlistEntity.listId, &playlistEntity.trackId, &playlistEntity.nextEntityId)
+		err := r.Scan(&playlistEntity.id, &playlistEntity.listId, &playlistEntity.trackId, &playlistEntity.nextEntityId)
 		if err != nil {
 			return nil, fmt.Errorf("error extracting playlist entities: %v", err)
 		}
