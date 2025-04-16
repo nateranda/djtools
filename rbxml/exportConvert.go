@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/nateranda/djtools/db"
@@ -21,7 +22,9 @@ func pathToURI(path string) (string, error) {
 		return "", fmt.Errorf("error converting path to URI: %v", err)
 	}
 	uriPath := filepath.ToSlash(absPath)
-	return "file://localhost/" + url.PathEscape(uriPath), nil
+	uriPath = url.PathEscape(uriPath)
+	uriPath = strings.ReplaceAll(uriPath, "%2F", "/") // this is a jank fix, replace with something more robust?
+	return "file://localhost/" + uriPath, nil
 }
 
 func exportConvertRating(rating int) (int32, error) {
