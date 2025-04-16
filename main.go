@@ -10,7 +10,7 @@ import (
 
 func main() {
 	importOptions := engine.ImportOptions{}
-	library, err := engine.Import("/Users/nateranda/Music/Engine Library Test/", importOptions)
+	library, err := engine.Import("/Users/nateranda/Music/Engine Library/", importOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
