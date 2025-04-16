@@ -8,9 +8,9 @@ Develop a basic feature set that serves as a minimum viable product. The program
 Next, analyze all edge cases and assumptions for evey function used. Write them down in the program's respective `edge-cases` entry and note if the assumption is handled effectively by the program. This should include corrupted or missing data, but also wrong datatypes and incorrect string formatting.
 
 ### Step 3: Testing
-Next, write unit tests for every function. They should consider the edge cases found in the last step. All large-scale tests (`Import()` or `Export()` and their derivative functions `Import[step]()` and `Export[step]()`) should be conducted with default options, but each option should be tested where the option applies. This is done to cut down existing test rewrites when adding new features.
+Next, write unit tests for all non-exported functions. They should consider the edge cases found in the last step. All large-scale functions (`Import[step]()` and `Export[step]()`) should be conducted with default options, but each option should be tested where the option applies. This is done to cut down existing test rewrites when adding new features. Then, write integration tests for all exported functions (`Import()` and `Export()`). These can be conducted with default options to save time and complexity, as the unit tests should handle options testing.
 
-Update the feature until it passes all unit tests. Test data should be stored either in the test itself or in a `test` directory in each package folder which may include database mocks and library gobs. After tests are developed, every new commit should pass all tests.
+Update the feature until it passes all tests. Test data should be stored either in the test itself or in a `test` directory in each package folder, which may include database mocks and library gobs. After tests are developed, every new commit should pass all tests.
 
 If a new database schema is released for the DJ program, the new schema should not replace the old schema in testing, rather both versions should be tested.
 
