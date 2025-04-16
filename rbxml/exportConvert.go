@@ -16,14 +16,10 @@ func unixToDate(date int) string {
 }
 
 func pathToURI(path string) (string, error) {
-	// Convert the path to an absolute path
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return "", fmt.Errorf("error converting path to URI: %v", err)
-	}
-	uriPath := filepath.ToSlash(absPath)
+	// this is a jank fix, replace with something more robust?
+	uriPath := filepath.ToSlash(path)
 	uriPath = url.PathEscape(uriPath)
-	uriPath = strings.ReplaceAll(uriPath, "%2F", "/") // this is a jank fix, replace with something more robust?
+	uriPath = strings.ReplaceAll(uriPath, "%2F", "/") // keep slashes
 	return "file://localhost/" + uriPath, nil
 }
 
