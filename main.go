@@ -1,19 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/engine"
+	"github.com/nateranda/djtools/rbxml"
 )
 
 func main() {
-	//importOptions := engine.ImportOptions{}
-	//library, err := engine.Import("/Users/nateranda/Music/Engine Library/Database2/", importOptions)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	var library db.Library
+	importOptions := engine.ImportOptions{}
+	library, err := engine.Import("/Users/nateranda/Music/Engine Library/", importOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//var library db.Library
 
-	db.Load(&library, "./tmp/library")
-	fmt.Println(library)
+	//db.Load(&library, "./tmp/library")
+	rbxml.Export(&library, "./tmp/library.xml")
 }

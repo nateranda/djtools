@@ -54,46 +54,47 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			return nil, fmt.Errorf("error converting song: %v", err)
 		}
 		tracks = append(tracks, track{
-			trackId:      song.SongID,
-			name:         song.Title,
-			artist:       song.Artist,
-			composer:     song.Composer,
-			album:        song.Album,
-			grouping:     song.Grouping,
-			genre:        song.Genre,
-			kind:         song.Filetype,
-			size:         int64(song.Size),
-			totalTime:    float64(song.Length), // make sure this is rounded?
-			discNumber:   0,
-			trackNumber:  int32(song.TrackNumber),
-			year:         int32(song.Year),
-			averageBpm:   float64(song.Bpm),
-			dateModified: unixToDate(song.DateModified),
-			dateAdded:    unixToDate(song.DateAdded),
-			bitRate:      int32(song.Bitrate),
-			sampleRate:   song.SampleRate,
-			comments:     song.Comment,
-			playCount:    int32(song.PlayCount),
-			lastPlayed:   unixToDate(song.LastPlayed),
-			rating:       rating,
-			location:     path,
-			remixer:      song.Remixer,
-			tonality:     song.Key, // wrong key type?
-			label:        song.Label,
-			mix:          song.Mix,
-			colour:       song.Color,
+			TrackId:      song.SongID,
+			Name:         song.Title,
+			Artist:       song.Artist,
+			Composer:     song.Composer,
+			Album:        song.Album,
+			Grouping:     song.Grouping,
+			Genre:        song.Genre,
+			Kind:         song.Filetype,
+			Size:         int64(song.Size),
+			TotalTime:    float64(song.Length), // make sure this is rounded?
+			DiscNumber:   0,
+			TrackNumber:  int32(song.TrackNumber),
+			Year:         int32(song.Year),
+			AverageBpm:   float64(song.Bpm),
+			DateModified: unixToDate(song.DateModified),
+			DateAdded:    unixToDate(song.DateAdded),
+			BitRate:      int32(song.Bitrate),
+			SampleRate:   song.SampleRate,
+			Comments:     song.Comment,
+			PlayCount:    int32(song.PlayCount),
+			LastPlayed:   unixToDate(song.LastPlayed),
+			Rating:       rating,
+			Location:     path,
+			Remixer:      song.Remixer,
+			Tonality:     song.Key, // wrong key type?
+			Label:        song.Label,
+			Mix:          song.Mix,
+			Colour:       song.Color,
 		})
 	}
 	return tracks, nil
 }
 
-func exportConvert(library *db.Library) (collection, error) {
-	var collection collection
+func exportConvert(library *db.Library) (djPlaylists, error) {
+	var djPlaylists djPlaylists
 	var err error
 
-	collection.tracks, err = exportConvertSong(library)
+	djPlaylists.Collection.Tracks, err = exportConvertSong(library)
+	djPlaylists.Collection.Entries = int32(len(djPlaylists.Collection.Tracks))
 	if err != nil {
-		return collection, err
+		return djPlaylists, err
 	}
-	return collection, nil
+	return djPlaylists, nil
 }

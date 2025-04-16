@@ -143,11 +143,11 @@ func qUncompress(file []byte) ([]byte, error) {
 
 // initDB initializes the Engine SQL database at a given path.
 func initDB(path string) (*sql.DB, *sql.DB, error) {
-	m, err := sql.Open("sqlite3", path+"m.db")
+	m, err := sql.Open("sqlite3", path+"Database2/m.db")
 	if err != nil {
 		return nil, nil, fmt.Errorf("error initializing database: %v", err)
 	}
-	hm, err := sql.Open("sqlite3", path+"hm.db")
+	hm, err := sql.Open("sqlite3", path+"Database2/hm.db")
 	if err != nil {
 		return nil, nil, fmt.Errorf("error initializing database: %v", err)
 	}

@@ -1,101 +1,115 @@
 package rbxml
 
 import (
+	"encoding/xml"
+	"fmt"
+	"os"
+
 	"github.com/nateranda/djtools/db"
 )
 
 type product struct {
-	name    string `xml:"Name,attr"`
-	version string `xml:"Version,attr"`
-	company string `xml:"Company,attr"`
+	Name    string `xml:"Name,attr"`
+	Version string `xml:"Version,attr"`
+	Company string `xml:"Company,attr"`
 }
 
 type track struct {
-	trackId      int     `xml:"TrackID,attr"`
-	name         string  `xml:"Name,attr"`
-	artist       string  `xml:"Artist,attr"`
-	composer     string  `xml:"Composer,attr"`
-	album        string  `xml:"Album,attr"`
-	grouping     string  `xml:"Grouping,attr"`
-	genre        string  `xml:"Genre,attr"`
-	kind         string  `xml:"Kind,attr"`
-	size         int64   `xml:"Size,attr"`
-	totalTime    float64 `xml:"TotalTime,attr"`
-	discNumber   int32   `xml:"DiscNumber,attr"`
-	trackNumber  int32   `xml:"TrackNumber, attr"`
-	year         int32   `xml:"Year,attr"`
-	averageBpm   float64 `xml:"AverageBpm,attr"`
-	dateModified string  `xml:"DateModidied,attr"` // yyyy-mm-dd
-	dateAdded    string  `xml:"DateAdded,attr"`    // yyyy-mm-dd
-	bitRate      int32   `xml:"BitRate,attr"`
-	sampleRate   float64 `xml:"SampleRate,attr"`
-	comments     string  `xml:"Comments,attr"`
-	playCount    int32   `xml:"PlayCount,attr"`
-	lastPlayed   string  `xml:"LastPlayed,attr"` // yyyy-mm-dd
-	rating       int32   `xml:"Rating,attr"`
-	location     string  `xml:"Location,attr"` // URI formatted
-	remixer      string  `xml:"Remixer,attr"`
-	tonality     string  `xml:"Tonality,attr"`
-	label        string  `xml:"Label,attr"`
-	mix          string  `xml:"Mix,attr"`
-	colour       string  `xml:"Colour,attr"` // 0x-appended hex
+	TrackId      int     `xml:"TrackID,attr"`
+	Name         string  `xml:"Name,attr"`
+	Artist       string  `xml:"Artist,attr"`
+	Composer     string  `xml:"Composer,attr"`
+	Album        string  `xml:"Album,attr"`
+	Grouping     string  `xml:"Grouping,attr"`
+	Genre        string  `xml:"Genre,attr"`
+	Kind         string  `xml:"Kind,attr"`
+	Size         int64   `xml:"Size,attr"`
+	TotalTime    float64 `xml:"TotalTime,attr"`
+	DiscNumber   int32   `xml:"DiscNumber,attr"`
+	TrackNumber  int32   `xml:"TrackNumber,attr"`
+	Year         int32   `xml:"Year,attr"`
+	AverageBpm   float64 `xml:"AverageBpm,attr"`
+	DateModified string  `xml:"DateModidied,attr"` // yyyy-mm-dd
+	DateAdded    string  `xml:"DateAdded,attr"`    // yyyy-mm-dd
+	BitRate      int32   `xml:"BitRate,attr"`
+	SampleRate   float64 `xml:"SampleRate,attr"`
+	Comments     string  `xml:"Comments,attr"`
+	PlayCount    int32   `xml:"PlayCount,attr"`
+	LastPlayed   string  `xml:"LastPlayed,attr"` // yyyy-mm-dd
+	Rating       int32   `xml:"Rating,attr"`
+	Location     string  `xml:"Location,attr"` // URI formatted
+	Remixer      string  `xml:"Remixer,attr"`
+	Tonality     string  `xml:"Tonality,attr"`
+	Label        string  `xml:"Label,attr"`
+	Mix          string  `xml:"Mix,attr"`
+	Colour       string  `xml:"Colour,attr"` // 0x-appended hex
 }
 
 type tempo struct {
-	inizio  float64 `xml:"Inizio,attr"`
-	bpm     float64 `xml:"Bpm,attr"`
-	metro   string  `xml:"Metro,attr"` // 4/4, 3/4, etc.
-	battito int32   `xml:"Battito,attr"`
+	Inizio  float64 `xml:"Inizio,attr"`
+	Bpm     float64 `xml:"Bpm,attr"`
+	Metro   string  `xml:"Metro,attr"` // 4/4, 3/4, etc.
+	Battito int32   `xml:"Battito,attr"`
 }
 
 type positionMark struct {
-	name     string  `xml:"Name,attr"`
-	markType int32   `xml:"Type,attr"` // cue=0, fade-in=1, fade-out=2, load=3, loop=4
-	start    float64 `xml:"Start,attr"`
-	end      float64 `xml:"End,attr"`
-	num      int32   `xml:"Num,attr"` // hot cue: 0, 1, 2... memory cue: -1
+	Name     string  `xml:"Name,attr"`
+	MarkType int32   `xml:"Type,attr"` // cue=0, fade-in=1, fade-out=2, load=3, loop=4
+	Start    float64 `xml:"Start,attr"`
+	End      float64 `xml:"End,attr"`
+	Num      int32   `xml:"Num,attr"` // hot cue: 0, 1, 2... memory cue: -1
 }
 
 type node struct {
-	nodeType int32       `xml:"Type,attr"` // folder=0, playlist=1
-	name     string      `xml:"Name,attr"`
-	count    int32       `xml:"Count,attr"`   // number of sub-nodes
-	entries  int32       `xml:"Entries,attr"` // number of tracks in playlist
-	keyType  int32       `xml:"KeyType,attr"` // trackId=0, location=1, should always be 0
-	tracks   []nodeTrack `xml:"TRACK"`
-	nodes    []node      `xml:"NODE"`
+	NodeType int32       `xml:"Type,attr"` // folder=0, playlist=1
+	Name     string      `xml:"Name,attr"`
+	Count    int32       `xml:"Count,attr"`   // number of sub-nodes
+	Entries  int32       `xml:"Entries,attr"` // number of tracks in playlist
+	KeyType  int32       `xml:"KeyType,attr"` // trackId=0, location=1, should always be 0
+	Tracks   []nodeTrack `xml:"TRACK"`
+	Nodes    []node      `xml:"NODE"`
 }
 
 type nodeTrack struct {
-	id int32 `xml:"Key,attr"`
+	Id int32 `xml:"Key,attr"`
 }
 
 type collection struct {
-	entries int32   `xml:"Entries,attr"` // number of tracks
-	tracks  []track `xml:"TRACK"`
+	Entries int32   `xml:"Entries,attr"` // number of tracks
+	Tracks  []track `xml:"TRACK"`
 }
 
 type playlists struct {
-	nodes []node `xml:"NODE"`
+	Nodes []node `xml:"NODE"`
 }
 
 type djPlaylists struct {
-	version    string     `xml:"Version,attr"` // should always be 1,0,0
-	product    product    `xml:"PRODUCT"`
-	collection collection `xml:"COLLECTION"`
-	playlists  playlists  `xml:"PLAYLISTS"`
+	XMLName    xml.Name   `xml:"DJPLAYLISTS"`
+	Version    string     `xml:"Version,attr"` // should always be 1,0,0
+	Product    product    `xml:"PRODUCT"`
+	Collection collection `xml:"COLLECTION"`
+	Playlists  playlists  `xml:"PLAYLISTS"`
 }
 
-func exportInsert(collection collection, path string) error {
+func exportInsert(djPlaylists *djPlaylists, path string) error {
+	xml, err := xml.MarshalIndent(djPlaylists, " ", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, xml, 0644)
+	if err != nil {
+		return fmt.Errorf("error exporting library: %v", err)
+	}
 	return nil
 }
 
 func Export(library *db.Library, path string) error {
-	collection, err := exportConvert(library)
+	djPlaylists, err := exportConvert(library)
 	if err != nil {
 		return err
 	}
-	err = exportInsert(collection, path)
+	err = exportInsert(&djPlaylists, path)
 	if err != nil {
 		return err
 	}
