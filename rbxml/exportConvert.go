@@ -10,17 +10,19 @@ import (
 	"github.com/nateranda/djtools/db"
 )
 
+const version string = "0.1"
+
 func unixToDate(date int) string {
 	t := time.Unix(int64(date), 0)
 	return t.Format("2006-01-02")
 }
 
-func pathToURI(path string) (string, error) {
+func pathToURI(path string) string {
 	// this is a jank fix, replace with something more robust?
 	uriPath := filepath.ToSlash(path)
 	uriPath = url.PathEscape(uriPath)
 	uriPath = strings.ReplaceAll(uriPath, "%2F", "/") // keep slashes
-	return "file://localhost/" + uriPath, nil
+	return "file://localhost/" + uriPath
 }
 
 func exportConvertRating(rating int) (int32, error) {
@@ -41,6 +43,54 @@ func exportConvertRating(rating int) (int32, error) {
 	return 0, fmt.Errorf("NoMatchError: rating %d did not match convention. Must be 0, 20, 40, 60, 80, or 100", rating)
 }
 
+func exportConvertPositionMarks(song *db.Song) []positionMark {
+	var positionMarks []positionMark
+	// add cue point
+	positionMarks = append(positionMarks, positionMark{
+		MarkType: 0,
+		Start:    song.Cue,
+		Num:      -1,
+	})
+
+	// add hot cues
+	for _, cue := range song.Cues {
+		positionMarks = append(positionMarks, positionMark{
+			Name:     cue.Name,
+			MarkType: 0,
+			Start:    cue.Offset,
+			Num:      int32(cue.Position - 1),
+		})
+	}
+
+	// add loops
+	for _, loop := range song.Loops {
+		positionMarks = append(positionMarks, positionMark{
+			Name:     loop.Name,
+			MarkType: 4,
+			Start:    loop.Start,
+			End:      loop.End,
+			Num:      int32(loop.Position - 1),
+		})
+	}
+
+	return positionMarks
+}
+
+func exportConvertGrid(song *db.Song) []tempo {
+	var tempos []tempo
+
+	for _, grid := range song.Grid {
+		tempos = append(tempos, tempo{
+			Inizio:  grid.StartPosition,
+			Bpm:     grid.Bpm,
+			Metro:   "4/4", // assumed, may add time signature support later
+			Battito: int32(grid.BeatNumber) + 1,
+		})
+	}
+
+	return tempos
+}
+
 func exportConvertSong(library *db.Library) ([]track, error) {
 	var tracks []track
 	for _, song := range library.Songs {
@@ -48,10 +98,9 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error converting song: %v", err)
 		}
-		path, err := pathToURI(song.Path)
-		if err != nil {
-			return nil, fmt.Errorf("error converting song: %v", err)
-		}
+		path := pathToURI(song.Path)
+		positionMarks := exportConvertPositionMarks(&song)
+		tempos := exportConvertGrid(&song)
 		tracks = append(tracks, track{
 			TrackId:      song.SongID,
 			Name:         song.Title,
@@ -63,7 +112,6 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			Kind:         song.Filetype,
 			Size:         int64(song.Size),
 			TotalTime:    float64(song.Length), // make sure this is rounded?
-			DiscNumber:   0,
 			TrackNumber:  int32(song.TrackNumber),
 			Year:         int32(song.Year),
 			AverageBpm:   float64(song.Bpm),
@@ -81,13 +129,22 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			Label:        song.Label,
 			Mix:          song.Mix,
 			Colour:       song.Color,
+			PositionMark: &positionMarks,
+			Tempo:        &tempos,
 		})
 	}
 	return tracks, nil
 }
 
 func exportConvert(library *db.Library) (djPlaylists, error) {
-	var djPlaylists djPlaylists
+	djPlaylists := djPlaylists{
+		Version: "1.0.0",
+		Product: product{
+			Name:    "djtools",
+			Version: version,
+			Company: "djtools",
+		},
+	}
 	var err error
 
 	djPlaylists.Collection.Tracks, err = exportConvertSong(library)

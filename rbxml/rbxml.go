@@ -15,34 +15,36 @@ type product struct {
 }
 
 type track struct {
-	TrackId      int     `xml:"TrackID,attr"`
-	Name         string  `xml:"Name,attr"`
-	Artist       string  `xml:"Artist,attr"`
-	Composer     string  `xml:"Composer,attr"`
-	Album        string  `xml:"Album,attr"`
-	Grouping     string  `xml:"Grouping,attr"`
-	Genre        string  `xml:"Genre,attr"`
-	Kind         string  `xml:"Kind,attr"`
-	Size         int64   `xml:"Size,attr"`
-	TotalTime    float64 `xml:"TotalTime,attr"`
-	DiscNumber   int32   `xml:"DiscNumber,attr"`
-	TrackNumber  int32   `xml:"TrackNumber,attr"`
-	Year         int32   `xml:"Year,attr"`
-	AverageBpm   float64 `xml:"AverageBpm,attr"`
-	DateModified string  `xml:"DateModidied,attr"` // yyyy-mm-dd
-	DateAdded    string  `xml:"DateAdded,attr"`    // yyyy-mm-dd
-	BitRate      int32   `xml:"BitRate,attr"`
-	SampleRate   float64 `xml:"SampleRate,attr"`
-	Comments     string  `xml:"Comments,attr"`
-	PlayCount    int32   `xml:"PlayCount,attr"`
-	LastPlayed   string  `xml:"LastPlayed,attr"` // yyyy-mm-dd
-	Rating       int32   `xml:"Rating,attr"`
-	Location     string  `xml:"Location,attr"` // URI formatted
-	Remixer      string  `xml:"Remixer,attr"`
-	Tonality     string  `xml:"Tonality,attr"`
-	Label        string  `xml:"Label,attr"`
-	Mix          string  `xml:"Mix,attr"`
-	Colour       string  `xml:"Colour,attr"` // 0x-appended hex
+	TrackId      int             `xml:"TrackID,attr"`
+	Name         string          `xml:"Name,attr,omitempty"`
+	Artist       string          `xml:"Artist,attr,omitempty"`
+	Composer     string          `xml:"Composer,attr,omitempty"`
+	Album        string          `xml:"Album,attr,omitempty"`
+	Grouping     string          `xml:"Grouping,attr,omitempty"`
+	Genre        string          `xml:"Genre,attr,omitempty"`
+	Kind         string          `xml:"Kind,attr,omitempty"`
+	Size         int64           `xml:"Size,attr,omitempty"`
+	TotalTime    float64         `xml:"TotalTime,attr,omitempty"`
+	DiscNumber   int32           `xml:"DiscNumber,attr,omitempty"`
+	TrackNumber  int32           `xml:"TrackNumber,attr,omitempty"`
+	Year         int32           `xml:"Year,attr,omitempty"`
+	AverageBpm   float64         `xml:"AverageBpm,attr,omitempty"`
+	DateModified string          `xml:"DateModidied,attr,omitempty"` // yyyy-mm-dd
+	DateAdded    string          `xml:"DateAdded,attr,omitempty"`    // yyyy-mm-dd
+	BitRate      int32           `xml:"BitRate,attr,omitempty"`
+	SampleRate   float64         `xml:"SampleRate,attr,omitempty"`
+	Comments     string          `xml:"Comments,attr,omitempty"`
+	PlayCount    int32           `xml:"PlayCount,attr,omitempty"`
+	LastPlayed   string          `xml:"LastPlayed,attr,omitempty"` // yyyy-mm-dd
+	Rating       int32           `xml:"Rating,attr,omitempty"`
+	Location     string          `xml:"Location,attr,omitempty"` // URI formatted
+	Remixer      string          `xml:"Remixer,attr,omitempty"`
+	Tonality     string          `xml:"Tonality,attr,omitempty"`
+	Label        string          `xml:"Label,attr,omitempty"`
+	Mix          string          `xml:"Mix,attr,omitempty"`
+	Colour       string          `xml:"Colour,attr,omitempty"` // 0x-appended hex
+	Tempo        *[]tempo        `xml:"TEMPO,omitempty"`
+	PositionMark *[]positionMark `xml:"POSITION_MARK,omitempty"`
 }
 
 type tempo struct {
@@ -56,18 +58,18 @@ type positionMark struct {
 	Name     string  `xml:"Name,attr"`
 	MarkType int32   `xml:"Type,attr"` // cue=0, fade-in=1, fade-out=2, load=3, loop=4
 	Start    float64 `xml:"Start,attr"`
-	End      float64 `xml:"End,attr"`
+	End      float64 `xml:"End,attr,omitempty"`
 	Num      int32   `xml:"Num,attr"` // hot cue: 0, 1, 2... memory cue: -1
 }
 
 type node struct {
-	NodeType int32       `xml:"Type,attr"` // folder=0, playlist=1
-	Name     string      `xml:"Name,attr"`
-	Count    int32       `xml:"Count,attr"`   // number of sub-nodes
-	Entries  int32       `xml:"Entries,attr"` // number of tracks in playlist
-	KeyType  int32       `xml:"KeyType,attr"` // trackId=0, location=1, should always be 0
-	Tracks   []nodeTrack `xml:"TRACK"`
-	Nodes    []node      `xml:"NODE"`
+	NodeType int32        `xml:"Type,attr"` // folder=0, playlist=1
+	Name     string       `xml:"Name,attr"`
+	Count    int32        `xml:"Count,attr,omitempty"`   // number of sub-nodes
+	Entries  int32        `xml:"Entries,attr,omitempty"` // number of tracks in playlist
+	KeyType  int32        `xml:"KeyType,attr,omitempty"` // trackId=0, location=1, should always be 0
+	Tracks   *[]nodeTrack `xml:"TRACK,omitempty"`
+	Nodes    *[]node      `xml:"NODE,omitempty"`
 }
 
 type nodeTrack struct {
@@ -80,11 +82,11 @@ type collection struct {
 }
 
 type playlists struct {
-	Nodes []node `xml:"NODE"`
+	Node []node `xml:"NODE"`
 }
 
 type djPlaylists struct {
-	XMLName    xml.Name   `xml:"DJPLAYLISTS"`
+	XMLName    xml.Name   `xml:"DJ_PLAYLISTS"`
 	Version    string     `xml:"Version,attr"` // should always be 1,0,0
 	Product    product    `xml:"PRODUCT"`
 	Collection collection `xml:"COLLECTION"`
