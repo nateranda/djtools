@@ -8,6 +8,8 @@ import (
 	"github.com/nateranda/djtools/db"
 )
 
+const version string = "0.1"
+
 type product struct {
 	Name    string `xml:"Name,attr"`
 	Version string `xml:"Version,attr"`
@@ -67,7 +69,7 @@ type node struct {
 	Name     string       `xml:"Name,attr"`
 	Count    int32        `xml:"Count,attr,omitempty"`   // number of sub-nodes
 	Entries  int32        `xml:"Entries,attr,omitempty"` // number of tracks in playlist
-	KeyType  int32        `xml:"KeyType,attr,omitempty"` // trackId=0, location=1, should always be 0
+	KeyType  int32        `xml:"KeyType,attr"`           // trackId=0, location=1, should always be 0
 	Tracks   *[]nodeTrack `xml:"TRACK,omitempty"`
 	Nodes    *[]node      `xml:"NODE,omitempty"`
 }
@@ -82,7 +84,7 @@ type collection struct {
 }
 
 type playlists struct {
-	Node []node `xml:"NODE"`
+	Node node `xml:"NODE"`
 }
 
 type djPlaylists struct {

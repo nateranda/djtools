@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/nateranda/djtools/db"
 )
-
-const version string = "0.1"
 
 func unixToDate(date int) string {
 	t := time.Unix(int64(date), 0)
@@ -91,6 +90,55 @@ func exportConvertGrid(song *db.Song) []tempo {
 	return tempos
 }
 
+func exportConvertSubPlaylists(playlist db.Playlist) []node {
+	var nodes []node
+
+	// add playlist node containing tracks
+	if playlist.Songs != nil {
+		var tracks []nodeTrack
+		for id := range playlist.Songs {
+			tracks = append(tracks, nodeTrack{Id: int32(id)})
+		}
+		nodes = append(nodes, node{
+			NodeType: 1,
+			Name:     playlist.Name,
+			Entries:  int32(len(playlist.Songs)),
+			Tracks:   &tracks,
+		})
+	}
+
+	// add folder node containing sub-playlists
+	if playlist.SubPlaylists != nil {
+		var subNodes []node
+		// add sub-playlist nodes recursively
+		for _, playlist := range playlist.SubPlaylists {
+			subNodes = slices.Concat(subNodes, exportConvertSubPlaylists(playlist))
+		}
+		nodes = append(nodes, node{
+			NodeType: 0,
+			Name:     playlist.Name,
+			Count:    int32(len(playlist.SubPlaylists)),
+			Nodes:    &subNodes,
+		})
+	}
+
+	return nodes
+}
+
+func exportConvertPlaylist(library *db.Library) node {
+	var nodes []node
+	for _, playlist := range library.Playlists {
+		nodes = slices.Concat(nodes, exportConvertSubPlaylists(playlist))
+	}
+
+	return node{
+		NodeType: 0,
+		Name:     "ROOT",
+		Count:    int32(len(library.Playlists)),
+		Nodes:    &nodes,
+	}
+}
+
 func exportConvertSong(library *db.Library) ([]track, error) {
 	var tracks []track
 	for _, song := range library.Songs {
@@ -152,5 +200,8 @@ func exportConvert(library *db.Library) (djPlaylists, error) {
 	if err != nil {
 		return djPlaylists, err
 	}
+
+	djPlaylists.Playlists = playlists{Node: exportConvertPlaylist(library)}
+
 	return djPlaylists, nil
 }
