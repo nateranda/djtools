@@ -133,10 +133,7 @@ func qUncompress(file []byte) ([]byte, error) {
 	defer r.Close()
 
 	var out bytes.Buffer
-	_, err = io.Copy(&out, r)
-	if err != nil {
-		return nil, fmt.Errorf("error uncompressing file: %v", err)
-	}
+	io.Copy(&out, r)
 
 	fileDecomp := out.Bytes()
 
@@ -153,19 +150,12 @@ func qUncompress(file []byte) ([]byte, error) {
 func initDB(path string) (engineDB, error) {
 	var db engineDB
 	var err error
-	db.m, err = sql.Open("sqlite3", path+"Database2/m.db")
-	fmt.Println("hi")
-	if err != nil {
-		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
-	}
+	db.m, _ = sql.Open("sqlite3", path+"Database2/m.db")
 	err = db.m.Ping()
 	if err != nil {
 		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
 	}
-	db.hm, err = sql.Open("sqlite3", path+"Database2/hm.db")
-	if err != nil {
-		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
-	}
+	db.hm, _ = sql.Open("sqlite3", path+"Database2/hm.db")
 	err = db.hm.Ping()
 	if err != nil {
 		return engineDB{}, fmt.Errorf("error initializing database: %v", err)

@@ -29,3 +29,17 @@ func TestQUncompress(t *testing.T) {
 	_, err = qUncompress(compBlob)
 	assert.NotNil(t, err, "Blob with invalid length should throw an error.")
 }
+
+func TestInitDB(t *testing.T) {
+	// valid path
+	_, err := initDB("../testing/engine/db/")
+	assert.Nil(t, err, "Valid path should not throw an error.")
+
+	// invalid path
+	_, err = initDB("./invalidPath/")
+	assert.NotNil(t, err, "Invalid path should throw an error.")
+}
+
+func TestBeatDataFromBlob(t *testing.T) {
+
+}

@@ -9,7 +9,11 @@ import (
 	"github.com/nateranda/djtools/db"
 )
 
-func beatDataFromBlob(blob []byte) beatData {
+func beatDataFromBlob(blob []byte) (beatData, error) {
+	if len(blob) < 33 {
+		return beatData{}, fmt.Errorf("InvalidBlobError: beatData blob should be at least 33 bytes")
+	}
+
 	var beatData beatData
 	i := 0 // byte index
 
@@ -46,7 +50,7 @@ func beatDataFromBlob(blob []byte) beatData {
 		beatData.adjBeatgrid = append(beatData.adjBeatgrid, marker)
 	}
 
-	return beatData
+	return beatData, nil
 }
 
 func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
@@ -329,7 +333,10 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 		if err != nil {
 			return err
 		}
-		beatData := beatDataFromBlob(beatDataBlob)
+		beatData, err := beatDataFromBlob(beatDataBlob)
+		if err != nil {
+			return err
+		}
 
 		song.SampleRate = beatData.sampleRate
 
