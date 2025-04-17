@@ -112,9 +112,17 @@ type marker struct {
 	numBeats   uint32
 }
 
+type engineDB struct {
+	m  *sql.DB
+	hm *sql.DB
+}
+
 // qUncompress uncompresses a uInt32-appended byte slice using zlib,
 // used for blobs compressed with the QT C++ library's qCompress function.
 func qUncompress(file []byte) ([]byte, error) {
+	if len(file) < 5 {
+		return nil, fmt.Errorf("error uncompressing file: blob must contain 5 or more bytes")
+	}
 	uncompressLength := binary.BigEndian.Uint32(file[:4])
 	buffer := bytes.NewBuffer(file[4:])
 	r, err := zlib.NewReader(buffer)
@@ -142,17 +150,27 @@ func qUncompress(file []byte) ([]byte, error) {
 }
 
 // initDB initializes the Engine SQL database at a given path.
-func initDB(path string) (*sql.DB, *sql.DB, error) {
-	m, err := sql.Open("sqlite3", path+"Database2/m.db")
+func initDB(path string) (engineDB, error) {
+	var db engineDB
+	var err error
+	db.m, err = sql.Open("sqlite3", path+"Database2/m.db")
+	fmt.Println("hi")
 	if err != nil {
-		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
 	}
-	hm, err := sql.Open("sqlite3", path+"Database2/hm.db")
+	err = db.m.Ping()
 	if err != nil {
-		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
 	}
-
-	return m, hm, nil
+	db.hm, err = sql.Open("sqlite3", path+"Database2/hm.db")
+	if err != nil {
+		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
+	}
+	err = db.hm.Ping()
+	if err != nil {
+		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
+	}
+	return db, nil
 }
 
 // Import converts an Engine database into a djtools Library struct

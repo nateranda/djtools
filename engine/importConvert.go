@@ -204,8 +204,7 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string) e
 }
 
 func findFirstPlaylist(playlists []playlist) (int, error) {
-	// map used for better performance
-	nextListIdMap := make(map[int]struct{}) // struct used because it takes up no data
+	nextListIdMap := make(map[int]struct{})
 	for _, playlist := range playlists {
 		if playlist.nextListId != 0 {
 			nextListIdMap[playlist.nextListId] = struct{}{}
@@ -224,8 +223,7 @@ func findFirstPlaylist(playlists []playlist) (int, error) {
 func findFirstSongs(playlistEntityList []playlistEntity) ([]playlistEntity, error) {
 	var firstSongs []playlistEntity
 
-	// map used for better performance
-	nextEntityIdMap := make(map[int]struct{}) // struct used because it takes up no data
+	nextEntityIdMap := make(map[int]struct{})
 	for _, playlistEntity := range playlistEntityList {
 		if playlistEntity.nextEntityId != 0 {
 			nextEntityIdMap[playlistEntity.nextEntityId] = struct{}{}
@@ -253,8 +251,8 @@ func sortPlaylists(playlists []playlist) ([]playlist, error) {
 	}
 
 	playlistMap := make(map[int]int)
-	for i, playlist := range playlists {
-		playlistMap[playlist.id] = i
+	for j, playlist := range playlists {
+		playlistMap[playlist.id] = j
 	}
 	var playlistsSorted []playlist
 	for range playlists {
@@ -327,7 +325,6 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 			fmt.Printf("Corrupt loops blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
 			continue
 		}
-
 		beatDataBlob, err := qUncompress(beatDataBlobComp)
 		if err != nil {
 			return err
