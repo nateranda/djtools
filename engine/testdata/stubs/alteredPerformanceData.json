@@ -37,7 +37,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 2,
@@ -133,7 +134,8 @@
           "Position": 8,
           "Color": "#1571E2"
         }
-      ]
+      ],
+      "Corrupt": false
     },
     {
       "SongID": 3,
@@ -172,7 +174,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 4,
@@ -211,7 +214,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 5,
@@ -299,7 +303,8 @@
           "Color": "#1571E2"
         }
       ],
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     }
   ],
   "Playlists": null

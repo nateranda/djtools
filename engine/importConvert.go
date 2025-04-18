@@ -321,21 +321,14 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 
 		beatDataBlobComp := perfDataEntry.beatDataBlob
 		if beatDataBlobComp == nil {
-			fmt.Printf("Corrupt beatData blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
+			fmt.Printf("Corrupt beatData blob for song id %d. Marking song corrupt...\n", perfDataEntry.id)
+			song.Corrupt = true
 			continue
 		}
 
 		quickCuesBlobComp := perfDataEntry.quickCuesBlob
-		if quickCuesBlobComp == nil {
-			fmt.Printf("Corrupt quickCues blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
-			continue
-		}
-
 		loopsBlob := perfDataEntry.loopsBlob
-		if loopsBlob == nil {
-			fmt.Printf("Corrupt loops blob for song id %d. Is the file corrupted? Skipping song...\n", perfDataEntry.id)
-			continue
-		}
+
 		beatDataBlob, err := qUncompress(beatDataBlobComp)
 		if err != nil {
 			return err
@@ -497,6 +490,38 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 	return nil
 }
 
+func removeSongFromPlaylists(playlists []db.Playlist, songID int) []db.Playlist {
+	for i := range playlists {
+		var updatedSongIDs []int
+		for _, id := range playlists[i].Songs {
+			if id != songID {
+				updatedSongIDs = append(updatedSongIDs, id)
+			}
+		}
+		playlists[i].Songs = updatedSongIDs
+
+		if playlists[i].SubPlaylists != nil {
+			playlists[i].SubPlaylists = removeSongFromPlaylists(playlists[i].SubPlaylists, songID)
+		}
+	}
+
+	return playlists
+}
+
+func importCheckCorruptedSongs(library *db.Library) {
+	for i, song := range library.Songs {
+		// this is expensive, but it should happen rarely so it's ok
+		if song.Corrupt {
+			// remove song from library.Songs (doesn't preserve order)
+			library.Songs[i] = library.Songs[len(library.Songs)-1]
+			library.Songs = library.Songs[:len(library.Songs)-1]
+
+			// remove song from playlists
+			library.Playlists = removeSongFromPlaylists(library.Playlists, song.SongID)
+		}
+	}
+}
+
 func importConvert(enLibrary library, path string, importOptions ImportOptions) (db.Library, error) {
 	var library db.Library
 	err := importConvertSong(&library, enLibrary.songs, path, importOptions)
@@ -512,6 +537,8 @@ func importConvert(enLibrary library, path string, importOptions ImportOptions) 
 	if err != nil {
 		return db.Library{}, err
 	}
+
+	importCheckCorruptedSongs(&library)
 
 	return library, nil
 }

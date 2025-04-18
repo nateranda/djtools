@@ -63,6 +63,7 @@ type Song struct {
 	Grid         []Marker // slice of Marker structs in order
 	Cues         []HotCue // slice of Cue structs out of order
 	Loops        []Loop   // slice of Loop structs out of order
+	Corrupt      bool     // is the song corrupted?
 }
 
 // Playlist is a playlist of songs which can contain other playlists.
