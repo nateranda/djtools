@@ -1,45 +1,116 @@
-package engine
+package engine_test
 
 import (
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"os"
+	"sort"
 	"testing"
 
+	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/engine"
 	"github.com/stretchr/testify/assert"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestQUncompress(t *testing.T) {
-	// valid blob
-	compBlob := []byte{0, 0, 0, 138, 120, 156, 115, 120, 218, 209, 192, 0, 4, 142, 81, 231, 189, 29, 128, 52, 35, 3, 4, 48, 73, 37, 238, 92, 46, 120, 233, 227, 129, 63, 255, 33, 160, 13, 36, 147, 192, 192, 144, 217, 242, 116, 222, 190, 123, 81, 142, 77, 48, 149, 72, 154, 40, 208, 199, 192, 0, 0, 75, 220, 41, 20}
-	uncompBlob := []byte{64, 229, 136, 128, 0, 0, 0, 0, 65, 90, 207, 75, 64, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 26, 97, 185, 167, 17, 210, 241, 192, 252, 255, 255, 255, 255, 255, 255, 255, 134, 1, 0, 0, 0, 96, 0, 0, 105, 132, 229, 158, 190, 222, 90, 65, 130, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 26, 97, 185, 167, 17, 210, 241, 192, 252, 255, 255, 255, 255, 255, 255, 255, 134, 1, 0, 0, 0, 96, 0, 0, 105, 132, 229, 158, 190, 222, 90, 65, 130, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	blob, err := qUncompress(compBlob)
-	assert.Nil(t, err, "Error on valid blob should be nil")
-	assert.Equal(t, uncompBlob, blob, "These blobs should be equal.")
+var defaultOptions = engine.ImportOptions{PreserveOriginalPaths: true}
 
-	// blob under 5 bytes
-	compBlob = []byte{0, 0, 0, 0}
-	_, err = qUncompress(compBlob)
-	assert.NotNil(t, err, "Blob of under 5 bytes should throw an error.")
+func generateDatabase(t *testing.T, fixturePath string) string {
+	tempdir := t.TempDir() + "/"
 
-	// corrupted blob
-	compBlob = []byte{0, 0, 0, 138, 121, 156, 115, 120, 218, 209, 192, 0, 4, 142, 81, 231, 189, 29, 128, 52, 35, 3, 4, 48, 73, 37, 238, 92, 46, 120, 233, 227, 129, 63, 255, 33, 160, 13, 36, 147, 192, 192, 144, 217, 242, 116, 222, 190, 123, 81, 142, 77, 48, 149, 72, 154, 40, 208, 199, 192, 0, 0, 75, 220, 41, 20}
-	_, err = qUncompress(compBlob)
-	assert.NotNil(t, err, "Corrupted blob should throw an error.")
+	//make Database2 directory inside of temp directory
+	os.Mkdir(tempdir+"Database2/", 0755)
 
-	// invalid length
-	compBlob = []byte{0, 0, 0, 139, 120, 156, 115, 120, 218, 209, 192, 0, 4, 142, 81, 231, 189, 29, 128, 52, 35, 3, 4, 48, 73, 37, 238, 92, 46, 120, 233, 227, 129, 63, 255, 33, 160, 13, 36, 147, 192, 192, 144, 217, 242, 116, 222, 190, 123, 81, 142, 77, 48, 149, 72, 154, 40, 208, 199, 192, 0, 0, 75, 220, 41, 20}
-	_, err = qUncompress(compBlob)
-	assert.NotNil(t, err, "Blob with invalid length should throw an error.")
+	// open and populate m.db with given fixture
+	m, _ := sql.Open("sqlite3", tempdir+"Database2/m.db")
+	err := m.Ping()
+	if err != nil {
+		t.Errorf("unexpected error creating test database: %v", err)
+	}
+
+	queryByte, err := os.ReadFile(fixturePath + "m.sql")
+	if err != nil {
+		t.Errorf("unexpected error reading from m.db fixture: %v", err)
+	}
+	query := string(queryByte)
+
+	m.Exec(query)
+
+	// open and populate hm.db with given fixture
+	hm, _ := sql.Open("sqlite3", tempdir+"Database2/hm.db")
+	err = hm.Ping()
+	if err != nil {
+		t.Errorf("unexpected error creating test database: %v", err)
+	}
+
+	queryByte, err = os.ReadFile(fixturePath + "hm.sql")
+	if err != nil {
+		t.Errorf("unexpected error reading from m.db fixture: %v", err)
+	}
+	query = string(queryByte)
+
+	hm.Exec(query)
+
+	return tempdir
 }
 
-func TestInitDB(t *testing.T) {
-	// valid path
-	_, err := initDB("../testing/engine/db/")
-	assert.Nil(t, err, "Valid path should not throw an error.")
+func saveStub(t *testing.T, library db.Library, path string) {
+	file, err := os.Create(path)
+	if err != nil {
+		t.Errorf("unexpected error saving library stub: %v", err)
+	}
+	defer file.Close()
 
-	// invalid path
-	_, err = initDB("./invalidPath/")
-	assert.NotNil(t, err, "Invalid path should throw an error.")
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(library)
+	if err != nil {
+		t.Errorf("unexpected error saving library stub: %v", err)
+	}
 }
 
-func TestBeatDataFromBlob(t *testing.T) {
+func loadStub(t *testing.T, path string) db.Library {
+	file, err := os.Open(path)
+	if err != nil {
+		t.Errorf("unexpected error loading library stub: %v", err)
+	}
+	defer file.Close()
 
+	var library db.Library
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&library)
+	if err != nil {
+		t.Errorf("unexpected error loading library stub: %v", err)
+	}
+	return library
+}
+
+// db.Library.Songs is order-agnostic, so songs will be sorted by id for testing purposes
+func sortSongs(library *db.Library) {
+	songs := library.Songs
+	sort.Slice(songs, func(i, j int) bool {
+		return songs[i].SongID < songs[j].SongID
+	})
+	library.Songs = songs
+}
+
+func TestImportEmpty(t *testing.T) {
+	tempdir := generateDatabase(t, "testdata/fixtures/empty/")
+	library, err := engine.Import(tempdir, defaultOptions)
+	assert.Nil(t, err, "Empty database import should return no errors.")
+	assert.Equal(t, library, db.Library{}, "Empty database import should return an empty library.")
+}
+func TestImportInvalidPath(t *testing.T) {
+	_, err := engine.Import("invalid/path", defaultOptions)
+	assert.Equal(t, err, errors.New("error initializing database: unable to open database file: no such file or directory"), "Invalid path should throw an error.")
+}
+
+func TestImportAlteredPerformanceData(t *testing.T) {
+	tempdir := generateDatabase(t, "testdata/fixtures/alteredPerformanceData/")
+	library, err := engine.Import(tempdir, defaultOptions)
+	sortSongs(&library)
+	stub := loadStub(t, "testdata/stubs/alteredPerformanceData.json")
+	assert.Nil(t, err, "Valid database import should return no errors.")
+	assert.Equal(t, library, stub, "Library should match expected output.")
 }

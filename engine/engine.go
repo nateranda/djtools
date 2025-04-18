@@ -16,8 +16,9 @@ import (
 
 // ImportOptions contains the options used when importing an Engine library.
 type ImportOptions struct {
-	ImportOriginalGrids bool
-	ImportOriginalCues  bool
+	ImportOriginalGrids   bool
+	ImportOriginalCues    bool
+	PreserveOriginalPaths bool
 }
 
 type library struct {

@@ -175,11 +175,17 @@ func fullPathFromRelativePath(basePath string, relativePath string) (string, err
 	return absolutePath, nil
 }
 
-func importConvertSong(library *db.Library, songsNull []songNull, path string) error {
+func importConvertSong(library *db.Library, songsNull []songNull, path string, importOptions ImportOptions) error {
+	var err error
 	for _, song := range songsNull {
-		songPath, err := fullPathFromRelativePath(path, song.path.String)
-		if err != nil {
-			return fmt.Errorf("error converting songs: %v", err)
+		var songPath string
+		if importOptions.PreserveOriginalPaths {
+			songPath = song.path.String
+		} else {
+			songPath, err = fullPathFromRelativePath(path, song.path.String)
+			if err != nil {
+				return fmt.Errorf("error converting songs: %v", err)
+			}
 		}
 		library.Songs = append(library.Songs, db.Song{
 			SongID:       int(song.id.Int64),
@@ -249,6 +255,7 @@ func findFirstSongs(playlistEntityList []playlistEntity) ([]playlistEntity, erro
 }
 
 func sortPlaylists(playlists []playlist) ([]playlist, error) {
+
 	i, err := findFirstPlaylist(playlists)
 	if err != nil {
 		return nil, fmt.Errorf("error sorting playlist: %v", err)
@@ -394,6 +401,10 @@ func importConvertHistory(library *db.Library, historyList []historyListEntity) 
 }
 
 func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
+	if playlists == nil {
+		return nil
+	}
+
 	playlists, err := populatePlaylists(playlistEntityList, playlists)
 	if err != nil {
 		return err
@@ -488,7 +499,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 
 func importConvert(enLibrary library, path string, importOptions ImportOptions) (db.Library, error) {
 	var library db.Library
-	err := importConvertSong(&library, enLibrary.songs, path)
+	err := importConvertSong(&library, enLibrary.songs, path, importOptions)
 	if err != nil {
 		return db.Library{}, err
 	}
