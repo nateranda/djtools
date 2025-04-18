@@ -53,12 +53,12 @@ func importExtractTrack(engineDB engineDB) ([]songNull, error) {
 	return songs, nil
 }
 
-func importExtractHistory(engineDB engineDB) ([]historyListEntity, error) {
-	query := `SELECT Track.originTrackId, HistorylistEntity.startTime
+func importExtractHistory(engineDB engineDB) ([]songHistory, error) {
+	query := `SELECT Track.originTrackId, COUNT(HistorylistEntity.trackId), MAX(HistorylistEntity.startTime) 
 		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
-		ORDER BY originTrackId, startTime`
+		GROUP BY Track.originTrackId ORDER BY Track.originTrackId`
 
-	var historyList []historyListEntity
+	var songHistoryList []songHistory
 
 	r, err := engineDB.hm.Query(query)
 	if err != nil {
@@ -67,15 +67,15 @@ func importExtractHistory(engineDB engineDB) ([]historyListEntity, error) {
 	defer r.Close()
 
 	for r.Next() {
-		HistoryListEntity := historyListEntity{}
-		err := r.Scan(&HistoryListEntity.id, &HistoryListEntity.startTime)
+		songHistory := songHistory{}
+		err := r.Scan(&songHistory.id, &songHistory.plays, &songHistory.lastPlayed)
 		if err != nil {
 			return nil, fmt.Errorf("error extracting track history: %v", err)
 		}
-		historyList = append(historyList, HistoryListEntity)
+		songHistoryList = append(songHistoryList, songHistory)
 	}
 
-	return historyList, nil
+	return songHistoryList, nil
 }
 
 func importExtractPerformanceData(engineDB engineDB) ([]performanceDataEntry, error) {
@@ -182,7 +182,7 @@ func importExtract(path string) (library, error) {
 	if err != nil {
 		return library{}, err
 	}
-	enLibrary.historyList, err = importExtractHistory(engineDB)
+	enLibrary.songHistoryList, err = importExtractHistory(engineDB)
 	if err != nil {
 		return library{}, err
 	}

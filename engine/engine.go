@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nateranda/djtools/db"
@@ -23,7 +22,7 @@ type ImportOptions struct {
 
 type library struct {
 	songs              []songNull
-	historyList        []historyListEntity
+	songHistoryList    []songHistory
 	perfData           []performanceDataEntry
 	playlists          []playlist
 	playlistEntityList []playlistEntity
@@ -51,11 +50,6 @@ type songNull struct {
 	key          sql.NullString
 	label        sql.NullString
 	lastEditTime sql.NullTime
-}
-
-type historyListEntity struct {
-	id        int
-	startTime time.Time
 }
 
 type songHistory struct {

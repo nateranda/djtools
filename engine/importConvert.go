@@ -143,28 +143,6 @@ func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 	return loops, nil
 }
 
-func songHistoryFromHistoryList(historyList []historyListEntity) []songHistory {
-	var songId int
-	var lastPlayed int
-	plays := 1
-
-	var SongHistoryData []songHistory
-
-	for i, HistoryListEntity := range historyList {
-		// append data if there are no more entries matching id
-		if HistoryListEntity.id > songId && i != 0 { // assumes historyList is sorted by id
-			SongHistoryData = append(SongHistoryData, songHistory{songId, plays, lastPlayed})
-			plays = 0
-		}
-		songId = HistoryListEntity.id
-		lastPlayed = int(HistoryListEntity.startTime.Unix())
-		plays += 1
-	}
-	SongHistoryData = append(SongHistoryData, songHistory{songId, plays, lastPlayed})
-
-	return SongHistoryData
-}
-
 // hard to test - platform-specific
 func fullPathFromRelativePath(basePath string, relativePath string) (string, error) {
 	fullPath := filepath.Join(basePath, relativePath)
@@ -374,22 +352,20 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 	return nil
 }
 
-func importConvertHistory(library *db.Library, historyList []historyListEntity) {
+func importConvertHistory(library *db.Library, songHistoryList []songHistory) {
 	songMap := make(map[int]*db.Song)
 	for i, song := range library.Songs {
 		songMap[song.SongID] = &library.Songs[i]
 	}
 
-	songHistoryData := songHistoryFromHistoryList(historyList)
-
-	for _, songHistoryDataEntry := range songHistoryData {
-		song := songMap[songHistoryDataEntry.id]
+	for _, songHistory := range songHistoryList {
+		song := songMap[songHistory.id]
 		// ignore any entries for removed songs
 		if song == nil {
 			continue
 		}
-		song.PlayCount = songHistoryDataEntry.plays
-		song.LastPlayed = songHistoryDataEntry.lastPlayed
+		song.PlayCount = songHistory.plays
+		song.LastPlayed = songHistory.lastPlayed
 	}
 }
 
@@ -532,7 +508,7 @@ func importConvert(enLibrary library, path string, importOptions ImportOptions) 
 	if err != nil {
 		return db.Library{}, err
 	}
-	importConvertHistory(&library, enLibrary.historyList)
+	importConvertHistory(&library, enLibrary.songHistoryList)
 	err = importConvertPlaylist(&library, enLibrary.playlists, enLibrary.playlistEntityList)
 	if err != nil {
 		return db.Library{}, err
