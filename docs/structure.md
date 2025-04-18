@@ -10,7 +10,7 @@ djtools/
 │  ├─ [program].go -> import/export framework, raw data structs, shared functions
 │  ├─ import[step].go -> step-specific import functions (if necessary)
 │  ├─ export[step].go -> step-specific export functions (if necessary)
-├─ cli/
+├─ cli/ (TBI)
 │  ├─ cli.go -> cli logic
-├─ main.go -> cli endpoint, dev testing
+├─ main.go -> cli endpoint
 ```
