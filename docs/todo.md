@@ -7,6 +7,7 @@
   - [x] testing
   - [ ] extended features
     - [ ] mp3 offset adjustment
+    - [ ] smartlists
 
 ### rbxml
 - [ ] export
