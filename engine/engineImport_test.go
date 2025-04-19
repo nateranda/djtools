@@ -170,3 +170,12 @@ func TestImportCorruptedSong(t *testing.T) {
 	assert.Nil(t, err, "Valid database import should return no errors.")
 	assert.Equal(t, library, stub, "Library should match expected output.")
 }
+
+func TestImportHistory(t *testing.T) {
+	tempdir := generateDatabase(t, "testdata/fixtures/history/")
+	library, err := engine.Import(tempdir, defaultOptions)
+	sortSongs(&library)
+	stub := loadStub(t, "testdata/stubs/history.json")
+	assert.Nil(t, err, "Valid database import should return no errors.")
+	assert.Equal(t, library, stub, "Library should match expected output.")
+}

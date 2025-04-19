@@ -1,0 +1,136 @@
+{
+  "Songs": [
+    {
+      "SongID": 1,
+      "Title": "EVERYDAY",
+      "Artist": "phace",
+      "Composer": "",
+      "Album": "EVERYDAY",
+      "Grouping": "",
+      "Genre": "Drum \u0026 Bass",
+      "Filetype": "mp3",
+      "Size": 10024421,
+      "Length": 248,
+      "TrackNumber": 0,
+      "Year": 2024,
+      "Bpm": 0,
+      "DateModified": 1745077054,
+      "DateAdded": 1745035200,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 1,
+      "LastPlayed": 1745077505,
+      "Rating": 0,
+      "Path": "../DJ Music/phace - EVERYDAY.mp3",
+      "Remixer": "",
+      "Key": "23",
+      "Label": "",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.3953488372093024,
+          "Bpm": 172,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 2,
+      "Title": "Flowers (Sunship Edit) (Original Mix)",
+      "Artist": "Sweet Female Attitude",
+      "Composer": "",
+      "Album": "In Person",
+      "Grouping": "",
+      "Genre": "UK Garage",
+      "Filetype": "mp3",
+      "Size": 9254340,
+      "Length": 230,
+      "TrackNumber": 0,
+      "Year": 2015,
+      "Bpm": 132,
+      "DateModified": 1745077782,
+      "DateAdded": 1745035200,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 2,
+      "LastPlayed": 1745078151,
+      "Rating": 0,
+      "Path": "../DJ Music/Sweet Female Attitude - Flowers (Sunship Edit) (Original Mix).mp3",
+      "Remixer": "",
+      "Key": "18",
+      "Label": "Reverb Records",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.11643522237295699,
+      "Grid": [
+        {
+          "StartPosition": -1.481377714534345,
+          "Bpm": 131.87368774414062,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 3,
+      "Title": "Falling van Buuren (Original Mix)",
+      "Artist": "Tranceman2000",
+      "Composer": "",
+      "Album": "Cheese Police",
+      "Grouping": "",
+      "Genre": "Trance",
+      "Filetype": "mp3",
+      "Size": 13384450,
+      "Length": 333,
+      "TrackNumber": 0,
+      "Year": 2020,
+      "Bpm": 155,
+      "DateModified": 1745077211,
+      "DateAdded": 1745035200,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/TRANCEMAN2000 - TMAN002 - Cheese Police - 02 Falling van Buuren.mp3",
+      "Remixer": "",
+      "Key": "9",
+      "Label": "",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.5483870967741937,
+          "Bpm": 155,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    }
+  ],
+  "Playlists": [
+    {
+      "PlaylistID": 1,
+      "Name": "playlist",
+      "Songs": [
+        1,
+        2,
+        3
+      ],
+      "SubPlaylists": null
+    }
+  ]
+}
