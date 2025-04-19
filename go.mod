@@ -1,9 +1,9 @@
 module github.com/nateranda/djtools
 
-go 1.23.3
+go 1.24.2
 
 require (
-	github.com/mattn/go-sqlite3 v1.14.27
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/stretchr/testify v1.10.0
 )
 

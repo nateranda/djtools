@@ -138,7 +138,6 @@ func qUncompress(file []byte) ([]byte, error) {
 	} else {
 		return fileDecomp, nil
 	}
-
 }
 
 // initDB initializes the Engine SQL database at a given path.
