@@ -10,7 +10,7 @@ import (
 func queryAndScanRows[T any](db *sql.DB, query string, scanFunc func(*sql.Rows) (T, error)) ([]T, error) {
 	r, err := db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("query error: %v", err)
+		return nil, fmt.Errorf("failed to execute query '%s': %v", query, err)
 	}
 	defer r.Close()
 
@@ -85,7 +85,8 @@ func importExtractPlaylistEntity(engineDB engineDB) ([]playlistEntity, error) {
 }
 
 func importExtractSmartlist(engineDB engineDB) ([]smartlist, error) {
-	query := `SELECT listUuid, title, parentPlaylistPath, nextPlaylistPath, nextListUuid, rules FROM Smartlist ORDER BY listUuid`
+	query := `SELECT listUuid, title, parentPlaylistPath, nextPlaylistPath, nextListUuid, rules
+		FROM Smartlist ORDER BY listUuid`
 
 	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (smartlist, error) {
 		var smartlist smartlist
@@ -105,27 +106,27 @@ func importExtract(path string) (library, error) {
 	}
 	enLibrary.songs, err = importExtractTrack(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting track data: %v", err)
 	}
 	enLibrary.songHistoryList, err = importExtractHistory(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting history data: %v", err)
 	}
 	enLibrary.perfData, err = importExtractPerformanceData(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting performance data: %v", err)
 	}
 	enLibrary.playlists, err = importExtractPlaylist(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting playlists: %v", err)
 	}
 	enLibrary.playlistEntityList, err = importExtractPlaylistEntity(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting playlist data: %v", err)
 	}
 	enLibrary.smartlistList, err = importExtractSmartlist(engineDB)
 	if err != nil {
-		return library{}, err
+		return library{}, fmt.Errorf("error extracting smartlists: %v", err)
 	}
 	return enLibrary, nil
 }
