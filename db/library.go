@@ -39,16 +39,16 @@ type Song struct {
 	Album        string   // album song is from
 	Grouping     string   // grouping
 	Genre        string   // genre
-	Filetype     string   // filetype, abbreviated
-	Size         int      // file size in bytes
-	Length       float32  // song length in seconds, approximate
+	Filetype     string   // filetype, abbreviated lowercase
+	Size         int      // file size, bytes
+	Length       float32  // song length, seconds
 	TrackNumber  int      // number in album
 	Year         int      // release year
 	Bpm          float32  // beats per minute
 	DateModified int      // date last modified, unix
 	DateAdded    int      // date added to library, unix
-	Bitrate      int      // bitrate in kilobytes per second
-	SampleRate   float64  // sample rate in hertz
+	Bitrate      int      // bitrate, kbps
+	SampleRate   float64  // sample rate, hz
 	Comment      string   // comment
 	PlayCount    int      // play count
 	LastPlayed   int      // date last played, unix
@@ -58,15 +58,15 @@ type Song struct {
 	Key          string   // key in int representation of camelot, 0-indexed: 0=8B, 1=8A, 2=9B... 23=7A
 	Label        string   // label
 	Mix          string   // mix
-	Color        string   // color in hex code
-	Cue          float64  // cue locatin in seconds
-	Grid         []Marker // slice of Marker structs in order
-	Cues         []HotCue // slice of Cue structs out of order
-	Loops        []Loop   // slice of Loop structs out of order
-	Corrupt      bool     // is the song corrupted?
+	Color        string   // color, hex code
+	Cue          float64  // cue location, seconds
+	Grid         []Marker // slice of Marker structs, ordered by start position
+	Cues         []HotCue // slice of Cue structs, unordered
+	Loops        []Loop   // slice of Loop structs, unordered
+	Corrupt      bool     // is the song file corrupted?
 }
 
-// Playlist is a playlist of songs which can contain other playlists.
+// Playlist is a set of ordered songs which can contain other playlists.
 // A folder is just a Playlist with no songs that contains other playlists.
 type Playlist struct {
 	PlaylistID   int        // playlist id used by software
@@ -77,10 +77,12 @@ type Playlist struct {
 
 // Library is the entire library of a DJ software.
 type Library struct {
-	Songs     []Song     // slice of Song structs, can be ordered
-	Playlists []Playlist // slice of Playlist structs in order
+	Songs     []Song     // slice of Song structs, unordered
+	Playlists []Playlist // slice of Playlist structs, ordered by position
 }
 
+// Save saves a Library struct to a gob file.
+// Not used in production.
 func Save(library *Library, path string) error {
 	file, err := os.Create(path)
 	if err != nil {
@@ -96,6 +98,8 @@ func Save(library *Library, path string) error {
 	return nil
 }
 
+// Save loads a Library struct from a gob file.
+// Not used in production.
 func Load(library *Library, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
