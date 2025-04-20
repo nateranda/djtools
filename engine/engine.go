@@ -107,11 +107,6 @@ type marker struct {
 	numBeats   uint32
 }
 
-type engineDB struct {
-	m  *sql.DB
-	hm *sql.DB
-}
-
 // qUncompress uncompresses a uInt32-appended byte slice using zlib,
 // used for blobs compressed with the QT C++ library's qCompress function.
 func qUncompress(file []byte) ([]byte, error) {
@@ -141,20 +136,19 @@ func qUncompress(file []byte) ([]byte, error) {
 }
 
 // initDB initializes the Engine SQL database at a given path.
-func initDB(path string) (engineDB, error) {
-	var db engineDB
+func initDB(path string) (*sql.DB, *sql.DB, error) {
 	var err error
-	db.m, _ = sql.Open("sqlite3", path+"Database2/m.db")
-	err = db.m.Ping()
+	m, _ := sql.Open("sqlite3", path+"Database2/m.db")
+	err = m.Ping()
 	if err != nil {
-		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
+		return nil, nil, fmt.Errorf("error initializing database: %v", err)
 	}
-	db.hm, _ = sql.Open("sqlite3", path+"Database2/hm.db")
-	err = db.hm.Ping()
+	hm, _ := sql.Open("sqlite3", path+"Database2/hm.db")
+	err = hm.Ping()
 	if err != nil {
-		return engineDB{}, fmt.Errorf("error initializing database: %v", err)
+		return nil, nil, fmt.Errorf("error initializing database: %v", err)
 	}
-	return db, nil
+	return m, hm, nil
 }
 
 // Import converts an Engine database into a djtools Library struct
