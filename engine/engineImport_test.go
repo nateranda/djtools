@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	fixturesDir = "testdata/fixtures/"
-	stubsDir    = "testdata/stubs/"
+	fixturesDir = "testdata/import/fixtures/"
+	stubsDir    = "testdata/import/stubs/"
 )
 
 var defaultOptions = engine.ImportOptions{
