@@ -15,8 +15,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// preserve original relative filepaths for operating system parity
-var defaultOptions = engine.ImportOptions{PreserveOriginalPaths: true}
+const (
+	fixturesDir = "testdata/fixtures/"
+	stubsDir    = "testdata/stubs/"
+)
+
+var defaultOptions = engine.ImportOptions{
+	PreserveOriginalPaths: true, // preserve original relative filepaths for operating system parity
+}
+
+type test struct {
+	name     string               // name of test
+	dirname  string               // fixture directory name
+	filename string               // stub file name
+	saveStub bool                 // save a new stub or not
+	options  engine.ImportOptions // importOptions to pass
+}
 
 // generateDatabase generates an Engine database from m.sql and hm.sql files
 func generateDatabase(t *testing.T, fixturePath string) string {
@@ -103,78 +117,38 @@ func sortSongs(library *db.Library) {
 
 func TestImportInvalidPath(t *testing.T) {
 	_, err := engine.Import("invalid/path", defaultOptions)
-	assert.Equal(t, err, errors.New("error initializing database: unable to open database file: no such file or directory"), "Invalid path should throw an error.")
+	assert.Equal(t, err,
+		errors.New("error initializing database: unable to open database file: no such file or directory"),
+		"Invalid path should throw an error.")
 }
 
-func TestImportEmpty(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/empty/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	assert.Nil(t, err, "Empty database import should return no errors.")
-	assert.Equal(t, library, db.Library{}, "Empty database import should return an empty library.")
-}
+func TestImport(t *testing.T) {
+	tests := []test{
+		{"Empty", "empty/", "empty.json", false, defaultOptions},
+		{"Songs", "songs/", "songs.json", false, defaultOptions},
+		{"SongsOriginal", "songsOriginal/", "songsOriginal.json", false, engine.ImportOptions{
+			PreserveOriginalPaths: true,
+			ImportOriginalCues:    true,
+			ImportOriginalGrids:   true,
+		}},
+		{"AlteredPerformanceData", "alteredPerformanceData/", "alteredPerformanceData.json", false, defaultOptions},
+		{"Playlists", "playlists/", "playlists.json", false, defaultOptions},
+		{"NestedPlaylists", "nestedPlaylists/", "nestedPlaylists.json", false, defaultOptions},
+		{"CorruptSong", "corruptSong/", "corruptSong.json", false, defaultOptions},
+		{"History", "history/", "history.json", false, defaultOptions},
+	}
 
-func TestImportAlteredPerformanceData(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/alteredPerformanceData/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/alteredPerformanceData.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportSongs(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/songs/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/songs.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportSongsOriginal(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/songs/")
-	options := defaultOptions
-	options.ImportOriginalCues = true
-	options.ImportOriginalGrids = true
-	library, err := engine.Import(tempdir, options)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/songsOriginal.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportPlaylists(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/playlists/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/playlists.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportNestedPlaylists(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/nestedPlaylists/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/nestedPlaylists.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportCorruptedSong(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/corruptSong/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/corruptSong.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
-}
-
-func TestImportHistory(t *testing.T) {
-	tempdir := generateDatabase(t, "testdata/fixtures/history/")
-	library, err := engine.Import(tempdir, defaultOptions)
-	sortSongs(&library)
-	stub := loadStub(t, "testdata/stubs/history.json")
-	assert.Nil(t, err, "Valid database import should return no errors.")
-	assert.Equal(t, library, stub, "Library should match expected output.")
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tempdir := generateDatabase(t, fixturesDir+test.dirname)
+			library, err := engine.Import(tempdir, test.options)
+			if test.saveStub {
+				saveStub(t, library, stubsDir+test.filename)
+			}
+			sortSongs(&library)
+			stub := loadStub(t, stubsDir+test.filename)
+			assert.Nil(t, err, "Valid database import should return no errors.")
+			assert.Equal(t, library, stub, "Library should match expected output.")
+		})
+	}
 }
