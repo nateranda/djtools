@@ -1,56 +1,44 @@
 package engine
 
 import (
+	"database/sql"
 	"fmt"
 )
 
-func importExtractTrack(engineDB engineDB) ([]songNull, error) {
-	var songs []songNull
-
-	query := `SELECT id, title, artist, composer,
-		album, genre, fileType, fileBytes,
-		length, year, bpm, dateAdded,
-		bitrate, comment, rating, path,
-		remixer, key, label, lastEditTime
-		FROM Track ORDER BY id`
-
-	r, err := engineDB.m.Query(query)
+// queryAndScanRows is a generic helper that queries a given database and scans
+// each row in the response based on a given function.
+func queryAndScanRows[T any](db *sql.DB, query string, scanFunc func(*sql.Rows) (T, error)) ([]T, error) {
+	r, err := db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("error extracting tracks: %v", err)
+		return nil, fmt.Errorf("query error: %v", err)
 	}
 	defer r.Close()
 
+	var results []T
 	for r.Next() {
-		song := songNull{}
-		err := r.Scan(
-			&song.id,
-			&song.title,
-			&song.artist,
-			&song.composer,
-			&song.album,
-			&song.genre,
-			&song.filetype,
-			&song.size,
-			&song.length,
-			&song.year,
-			&song.bpm,
-			&song.dateAdded,
-			&song.bitrate,
-			&song.comment,
-			&song.rating,
-			&song.path,
-			&song.remixer,
-			&song.key,
-			&song.label,
-			&song.lastEditTime,
-		)
+		item, err := scanFunc(r)
 		if err != nil {
-			return nil, fmt.Errorf("error extracting tracks: %v", err)
+			return nil, fmt.Errorf("scan error: %v", err)
 		}
-		songs = append(songs, song)
+		results = append(results, item)
 	}
+	return results, nil
+}
 
-	return songs, nil
+func importExtractTrack(engineDB engineDB) ([]songNull, error) {
+	query := `SELECT id, title, artist, composer, album, genre, fileType, fileBytes, length, year,
+		bpm, dateAdded, bitrate, comment, rating, path, remixer, key, label, lastEditTime
+		FROM Track ORDER BY id`
+
+	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (songNull, error) {
+		var song songNull
+		err := r.Scan(
+			&song.id, &song.title, &song.artist, &song.composer, &song.album, &song.genre, &song.filetype,
+			&song.size, &song.length, &song.year, &song.bpm, &song.dateAdded, &song.bitrate, &song.comment,
+			&song.rating, &song.path, &song.remixer, &song.key, &song.label, &song.lastEditTime,
+		)
+		return song, err
+	})
 }
 
 func importExtractHistory(engineDB engineDB) ([]songHistory, error) {
@@ -58,116 +46,53 @@ func importExtractHistory(engineDB engineDB) ([]songHistory, error) {
 		FROM Track JOIN HistorylistEntity ON Track.id=HistorylistEntity.trackId
 		GROUP BY Track.originTrackId ORDER BY Track.originTrackId`
 
-	var songHistoryList []songHistory
-
-	r, err := engineDB.hm.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting track history: %v", err)
-	}
-	defer r.Close()
-
-	for r.Next() {
-		songHistory := songHistory{}
+	return queryAndScanRows(engineDB.hm, query, func(r *sql.Rows) (songHistory, error) {
+		var songHistory songHistory
 		err := r.Scan(&songHistory.id, &songHistory.plays, &songHistory.lastPlayed)
-		if err != nil {
-			return nil, fmt.Errorf("error extracting track history: %v", err)
-		}
-		songHistoryList = append(songHistoryList, songHistory)
-	}
-
-	return songHistoryList, nil
+		return songHistory, err
+	})
 }
 
 func importExtractPerformanceData(engineDB engineDB) ([]performanceDataEntry, error) {
 	query := `SELECT trackId, beatData, quickCues, loops FROM PerformanceData ORDER BY trackId`
 
-	var perfDataList []performanceDataEntry
-
-	r, err := engineDB.m.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting performance data: %v", err)
-	}
-	defer r.Close()
-
-	for r.Next() {
+	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (performanceDataEntry, error) {
 		var perfData performanceDataEntry
 		err := r.Scan(&perfData.id, &perfData.beatDataBlob, &perfData.quickCuesBlob, &perfData.loopsBlob)
-		if err != nil {
-			return nil, fmt.Errorf("error extracting performance data: %v", err)
-		}
-		perfDataList = append(perfDataList, perfData)
-	}
-
-	return perfDataList, nil
+		return perfData, err
+	})
 }
 
 func importExtractPlaylist(engineDB engineDB) ([]playlist, error) {
 	query := `SELECT id, title, parentListId, nextListId FROM Playlist ORDER BY id`
 
-	var playlists []playlist
-
-	r, err := engineDB.m.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting playlists: %v", err)
-	}
-	defer r.Close()
-
-	for r.Next() {
+	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (playlist, error) {
 		var playlist playlist
 		err := r.Scan(&playlist.id, &playlist.title, &playlist.parentListId, &playlist.nextListId)
-		if err != nil {
-			return nil, fmt.Errorf("error extracting playlists: %v", err)
-		}
-		playlists = append(playlists, playlist)
-	}
-
-	return playlists, nil
+		return playlist, err
+	})
 }
 
 func importExtractPlaylistEntity(engineDB engineDB) ([]playlistEntity, error) {
 	query := `SELECT id, listId, trackId, nextEntityId FROM PlaylistEntity ORDER BY listId`
 
-	var playlistEntityList []playlistEntity
-
-	r, err := engineDB.m.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting playlist entities: %v", err)
-	}
-	defer r.Close()
-
-	for r.Next() {
+	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (playlistEntity, error) {
 		var playlistEntity playlistEntity
-		err := r.Scan(&playlistEntity.id, &playlistEntity.listId, &playlistEntity.trackId, &playlistEntity.nextEntityId)
-		if err != nil {
-			return nil, fmt.Errorf("error extracting playlist entities: %v", err)
-		}
-		playlistEntityList = append(playlistEntityList, playlistEntity)
-	}
-
-	return playlistEntityList, nil
+		err := r.Scan(&playlistEntity.id, &playlistEntity.listId,
+			&playlistEntity.trackId, &playlistEntity.nextEntityId)
+		return playlistEntity, err
+	})
 }
 
 func importExtractSmartlist(engineDB engineDB) ([]smartlist, error) {
 	query := `SELECT listUuid, title, parentPlaylistPath, nextPlaylistPath, nextListUuid, rules FROM Smartlist ORDER BY listUuid`
 
-	var smartlistList []smartlist
-
-	r, err := engineDB.m.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error extracting smartlists: %v", err)
-	}
-	defer r.Close()
-
-	for r.Next() {
+	return queryAndScanRows(engineDB.m, query, func(r *sql.Rows) (smartlist, error) {
 		var smartlist smartlist
-		err := r.Scan(&smartlist.listUuid, &smartlist.title, &smartlist.parentPlaylistPath, &smartlist.nextPlaylistPath, &smartlist.nextListUuid, &smartlist.rules)
-		if err != nil {
-			return nil, fmt.Errorf("error extracting smartlists: %v", err)
-		}
-		smartlistList = append(smartlistList, smartlist)
-	}
-
-	return smartlistList, nil
+		err := r.Scan(&smartlist.listUuid, &smartlist.title, &smartlist.parentPlaylistPath,
+			&smartlist.nextPlaylistPath, &smartlist.nextListUuid, &smartlist.rules)
+		return smartlist, err
+	})
 }
 
 func importExtract(path string) (library, error) {
