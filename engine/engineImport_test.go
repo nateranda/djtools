@@ -117,7 +117,6 @@ func TestImportAlteredPerformanceData(t *testing.T) {
 	tempdir := generateDatabase(t, "testdata/fixtures/alteredPerformanceData/")
 	library, err := engine.Import(tempdir, defaultOptions)
 	sortSongs(&library)
-	saveStub(t, library, "testdata/stubs/alteredPerformanceData.json")
 	stub := loadStub(t, "testdata/stubs/alteredPerformanceData.json")
 	assert.Nil(t, err, "Valid database import should return no errors.")
 	assert.Equal(t, library, stub, "Library should match expected output.")
