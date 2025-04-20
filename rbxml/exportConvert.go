@@ -24,6 +24,56 @@ func pathToURI(path string) string {
 	return "file://localhost/" + uriPath
 }
 
+func exportConvertTonality(key int) (string, error) {
+	switch key {
+	case 0:
+		return "8B", nil
+	case 1:
+		return "8A", nil
+	case 2:
+		return "9B", nil
+	case 3:
+		return "9A", nil
+	case 4:
+		return "10B", nil
+	case 5:
+		return "10A", nil
+	case 6:
+		return "11B", nil
+	case 7:
+		return "11A", nil
+	case 8:
+		return "12B", nil
+	case 9:
+		return "12A", nil
+	case 10:
+		return "1B", nil
+	case 11:
+		return "1A", nil
+	case 12:
+		return "2B", nil
+	case 13:
+		return "2A", nil
+	case 14:
+		return "3B", nil
+	case 15:
+		return "3A", nil
+	case 16:
+		return "4B", nil
+	case 17:
+		return "4A", nil
+	case 18:
+		return "5B", nil
+	case 19:
+		return "5A", nil
+	case 20:
+		return "6B", nil
+	case 21:
+		return "6A", nil
+	}
+	return "", fmt.Errorf("key outside accepted range")
+}
+
 func exportConvertRating(rating int) (int32, error) {
 	switch rating {
 	case 0:
@@ -147,6 +197,10 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			return nil, fmt.Errorf("error converting song: %v", err)
 		}
 		path := pathToURI(song.Path)
+		tonality, err := exportConvertTonality(song.Key)
+		if err != nil {
+			return nil, fmt.Errorf("error converting song: %v", err)
+		}
 		positionMarks := exportConvertPositionMarks(&song)
 		tempos := exportConvertGrid(&song)
 		tracks = append(tracks, track{
@@ -173,7 +227,7 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			Rating:       rating,
 			Location:     path,
 			Remixer:      song.Remixer,
-			Tonality:     song.Key, // wrong key type?
+			Tonality:     tonality, // wrong key type?
 			Label:        song.Label,
 			Mix:          song.Mix,
 			Colour:       song.Color,

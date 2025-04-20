@@ -24,7 +24,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Kettama - Pretty Green Eyes  (Sunset Ibiza Mix).mp3",
       "Remixer": "",
-      "Key": "15",
+      "Key": 15,
       "Label": "KETTAMA",
       "Mix": "",
       "Color": "",
@@ -37,7 +37,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 2,
@@ -63,7 +64,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Four Tet - Parallel 4.mp3",
       "Remixer": "",
-      "Key": "9",
+      "Key": 9,
       "Label": "Text Records",
       "Mix": "",
       "Color": "",
@@ -76,7 +77,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 3,
@@ -102,7 +104,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Pretty Girl - The Only Way Out Is Through.mp3",
       "Remixer": "",
-      "Key": "13",
+      "Key": 13,
       "Label": "Gallery Recordings",
       "Mix": "",
       "Color": "",
@@ -115,7 +117,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 4,
@@ -141,7 +144,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Riko Dan \u0026 Interplanetary Criminal - Gunman (Original Mix).mp3",
       "Remixer": "",
-      "Key": "5",
+      "Key": 5,
       "Label": "ATW Records",
       "Mix": "",
       "Color": "",
@@ -154,7 +157,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 5,
@@ -180,7 +184,7 @@
       "Rating": 0,
       "Path": "../DJ Music/SG Lewis \u0026 Chloé Caillet \u0026 X CLUB. - B Somebody (X CLUB. Remix).mp3",
       "Remixer": "",
-      "Key": "15",
+      "Key": 15,
       "Label": "SMIILE RECORDS SMIILE RECORDS",
       "Mix": "",
       "Color": "",
@@ -193,7 +197,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     }
   ],
   "Playlists": [

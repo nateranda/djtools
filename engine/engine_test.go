@@ -142,10 +142,10 @@ func TestImport(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tempdir := generateDatabase(t, fixturesDir+test.dirname)
 			library, err := engine.Import(tempdir, test.options)
+			sortSongs(&library)
 			if test.saveStub {
 				saveStub(t, library, stubsDir+test.filename)
 			}
-			sortSongs(&library)
 			stub := loadStub(t, stubsDir+test.filename)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")

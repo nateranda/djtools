@@ -184,7 +184,7 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string, i
 			Rating:       int(song.rating.Int64),
 			Path:         songPath,
 			Remixer:      song.remixer.String,
-			Key:          song.key.String,
+			Key:          int(song.key.Int32),
 			Label:        song.label.String,
 		})
 	}

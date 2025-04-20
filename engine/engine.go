@@ -47,7 +47,7 @@ type songNull struct {
 	rating       sql.NullInt64
 	path         sql.NullString
 	remixer      sql.NullString
-	key          sql.NullString
+	key          sql.NullInt32
 	label        sql.NullString
 	lastEditTime sql.NullTime
 }

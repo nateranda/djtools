@@ -24,7 +24,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Aphex Twin - Pulsewidth.mp3",
       "Remixer": "",
-      "Key": "14",
+      "Key": 14,
       "Label": "R\u0026S Records",
       "Mix": "",
       "Color": "",
@@ -37,7 +37,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 2,
@@ -63,7 +64,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Disclosure - We Were in Love.mp3",
       "Remixer": "",
-      "Key": "23",
+      "Key": 23,
       "Label": "Apollo Recs",
       "Mix": "",
       "Color": "",
@@ -76,7 +77,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 3,
@@ -102,7 +104,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Gemi - Drogba.mp3",
       "Remixer": "",
-      "Key": "21",
+      "Key": 21,
       "Label": "[no label]",
       "Mix": "",
       "Color": "",
@@ -115,7 +117,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     },
     {
       "SongID": 4,
@@ -141,7 +144,7 @@
       "Rating": 0,
       "Path": "../DJ Music/Mall Grab \u0026 False Persona - Crazy (Original Mix).mp3",
       "Remixer": "",
-      "Key": "15",
+      "Key": 15,
       "Label": "Fragrance Recordings Fragrance Recordings",
       "Mix": "",
       "Color": "",
@@ -154,7 +157,8 @@
         }
       ],
       "Cues": null,
-      "Loops": null
+      "Loops": null,
+      "Corrupt": false
     }
   ],
   "Playlists": null

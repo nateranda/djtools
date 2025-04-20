@@ -55,7 +55,7 @@ type Song struct {
 	Rating       int      // rating in multiples of 20: 0*=0, 1*=20... 5*=100
 	Path         string   // song absolute path
 	Remixer      string   // remixer
-	Key          string   // key in int representation of camelot, 0-indexed: 0=8B, 1=8A, 2=9B... 23=7A
+	Key          int      // key in int representation of camelot, 0-indexed: 0=8B, 1=8A, 2=9B... 23=7A
 	Label        string   // label
 	Mix          string   // mix
 	Color        string   // color, hex code
