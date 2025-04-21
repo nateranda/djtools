@@ -70,6 +70,10 @@ func exportConvertTonality(key int) (string, error) {
 		return "6B", nil
 	case 21:
 		return "6A", nil
+	case 22:
+		return "7B", nil
+	case 23:
+		return "7A", nil
 	}
 	return "", fmt.Errorf("key outside accepted range")
 }
