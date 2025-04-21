@@ -2,7 +2,6 @@ package engine_test
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"os"
 	"sort"
@@ -72,39 +71,6 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 	return tempdir
 }
 
-// saveStub saves a db.Library struct to a json-formatted stub
-func saveStub(t *testing.T, library db.Library, path string) {
-	file, err := os.Create(path)
-	if err != nil {
-		t.Errorf("unexpected error saving library stub: %v", err)
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	err = encoder.Encode(library)
-	if err != nil {
-		t.Errorf("unexpected error saving library stub: %v", err)
-	}
-}
-
-// loadStub loads a json-formatted db.Library struct stub
-func loadStub(t *testing.T, path string) db.Library {
-	file, err := os.Open(path)
-	if err != nil {
-		t.Errorf("unexpected error loading library stub: %v", err)
-	}
-	defer file.Close()
-
-	var library db.Library
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&library)
-	if err != nil {
-		t.Errorf("unexpected error loading library stub: %v", err)
-	}
-	return library
-}
-
 // sortSongs sorts db.Library songs based on id,
 // used because db.Library.Songs is order-agnostic
 func sortSongs(library *db.Library) {
@@ -144,9 +110,9 @@ func TestImport(t *testing.T) {
 			library, err := engine.Import(tempdir, test.options)
 			sortSongs(&library)
 			if test.saveStub {
-				saveStub(t, library, stubsDir+test.filename)
+				db.SaveStub(t, library, stubsDir+test.filename)
 			}
-			stub := loadStub(t, stubsDir+test.filename)
+			stub := db.LoadStub(t, stubsDir+test.filename)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})
