@@ -227,7 +227,7 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 			Rating:       rating,
 			Location:     path,
 			Remixer:      song.Remixer,
-			Tonality:     tonality, // wrong key type?
+			Tonality:     tonality,
 			Label:        song.Label,
 			Mix:          song.Mix,
 			Colour:       song.Color,

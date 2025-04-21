@@ -1,0 +1,247 @@
+{
+  "Songs": [
+    {
+      "SongID": 1,
+      "Title": "Pretty Green Eyes  (Sunset Ibiza Mix)",
+      "Artist": "Kettama",
+      "Composer": "",
+      "Album": "Pretty Green Eyes (Sunset Ibiza Mix)",
+      "Grouping": "",
+      "Genre": "Techno",
+      "Filetype": "mp3",
+      "Size": 12001914,
+      "Length": 259,
+      "TrackNumber": 0,
+      "Year": 2024,
+      "Bpm": 143,
+      "DateModified": 1744944681,
+      "DateAdded": 1744862400,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/Kettama - Pretty Green Eyes  (Sunset Ibiza Mix).mp3",
+      "Remixer": "",
+      "Key": 15,
+      "Label": "KETTAMA",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.6783216783216783,
+          "Bpm": 143,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 2,
+      "Title": "Parallel 4",
+      "Artist": "Four Tet",
+      "Composer": "Kieran Hebden",
+      "Album": "Parallel",
+      "Grouping": "",
+      "Genre": "House",
+      "Filetype": "mp3",
+      "Size": 11564905,
+      "Length": 288,
+      "TrackNumber": 0,
+      "Year": 2020,
+      "Bpm": 126,
+      "DateModified": 1744944685,
+      "DateAdded": 1744862400,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/Four Tet - Parallel 4.mp3",
+      "Remixer": "",
+      "Key": 9,
+      "Label": "Text Records",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.756330398176766,
+          "Bpm": 125.83481597900386,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 3,
+      "Title": "The Only Way Out Is Through",
+      "Artist": "Pretty Girl",
+      "Composer": "",
+      "Album": "The Only Way Out Is Through",
+      "Grouping": "",
+      "Genre": "House",
+      "Filetype": "mp3",
+      "Size": 19821655,
+      "Length": 494,
+      "TrackNumber": 0,
+      "Year": 2021,
+      "Bpm": 125,
+      "DateModified": 1744944689,
+      "DateAdded": 1744862400,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/Pretty Girl - The Only Way Out Is Through.mp3",
+      "Remixer": "",
+      "Key": 13,
+      "Label": "Gallery Recordings",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.8660687048256799,
+          "Bpm": 125.00000000000001,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 4,
+      "Title": "Gunman (Original Mix)",
+      "Artist": "Riko Dan, Interplanetary Criminal",
+      "Composer": "",
+      "Album": "ATW007",
+      "Grouping": "",
+      "Genre": "UK Garage",
+      "Filetype": "mp3",
+      "Size": 15324588,
+      "Length": 349,
+      "TrackNumber": 0,
+      "Year": 2024,
+      "Bpm": 138,
+      "DateModified": 1744944690,
+      "DateAdded": 1744862400,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/Riko Dan \u0026 Interplanetary Criminal - Gunman (Original Mix).mp3",
+      "Remixer": "",
+      "Key": 5,
+      "Label": "ATW Records",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.7168928015294371,
+          "Bpm": 138.00000000000003,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    },
+    {
+      "SongID": 5,
+      "Title": "B Somebody (X CLUB. Remix)",
+      "Artist": "SG Lewis, Chloé Caillet, X CLUB.",
+      "Composer": "",
+      "Album": "B Somebody (X CLUB. Remix)",
+      "Grouping": "",
+      "Genre": "Techno",
+      "Filetype": "mp3",
+      "Size": 12719646,
+      "Length": 246,
+      "TrackNumber": 0,
+      "Year": 2025,
+      "Bpm": 0,
+      "DateModified": 1744944696,
+      "DateAdded": 1744862400,
+      "Bitrate": 320,
+      "SampleRate": 44100,
+      "Comment": "",
+      "PlayCount": 0,
+      "LastPlayed": 0,
+      "Rating": 0,
+      "Path": "../DJ Music/SG Lewis \u0026 Chloé Caillet \u0026 X CLUB. - B Somebody (X CLUB. Remix).mp3",
+      "Remixer": "",
+      "Key": 15,
+      "Label": "SMIILE RECORDS SMIILE RECORDS",
+      "Mix": "",
+      "Color": "",
+      "Cue": -0.000022675736961451248,
+      "Grid": [
+        {
+          "StartPosition": -1.6501145568073197,
+          "Bpm": 141,
+          "BeatNumber": 0
+        }
+      ],
+      "Cues": null,
+      "Loops": null,
+      "Corrupt": false
+    }
+  ],
+  "Playlists": [
+    {
+      "PlaylistID": 1,
+      "Name": "playlist1",
+      "Songs": [
+        5,
+        1,
+        3,
+        4,
+        2
+      ],
+      "SubPlaylists": [
+        {
+          "PlaylistID": 2,
+          "Name": "playlist2",
+          "Songs": [
+            3,
+            4,
+            2,
+            1
+          ],
+          "SubPlaylists": [
+            {
+              "PlaylistID": 3,
+              "Name": "playlist3",
+              "Songs": [
+                2,
+                1
+              ],
+              "SubPlaylists": [
+                {
+                  "PlaylistID": 4,
+                  "Name": "playlist4",
+                  "Songs": null,
+                  "SubPlaylists": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
