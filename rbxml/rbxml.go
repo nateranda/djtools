@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/nateranda/djtools/db"
 )
@@ -95,8 +96,31 @@ type djPlaylists struct {
 	Playlists  playlists  `xml:"PLAYLISTS"`
 }
 
-func exportInsert(djPlaylists *djPlaylists, path string) error {
-	xml, err := xml.MarshalIndent(djPlaylists, " ", "  ")
+// sort sorts a djPlaylists struct's songs by song id,
+// then each song's PositionMarks by cue, then cue points by id, then loops by id.
+// This is to standardize each XML output for testing and consistency
+func (d *djPlaylists) sort() {
+	sort.Slice(d.Collection.Tracks, func(i, j int) bool {
+		return d.Collection.Tracks[i].TrackId < d.Collection.Tracks[j].TrackId
+	})
+
+	for i, track := range d.Collection.Tracks {
+		positionMarks := *track.PositionMark
+		sort.Slice(positionMarks, func(i, j int) bool {
+			// Sort by MarkType first
+			if positionMarks[i].MarkType != positionMarks[j].MarkType {
+				return positionMarks[i].MarkType < positionMarks[j].MarkType
+			}
+			// If MarkType is the same, sort by Num
+			return positionMarks[i].Num < positionMarks[j].Num
+		})
+		d.Collection.Tracks[i].PositionMark = &positionMarks
+	}
+}
+
+// write writes a djPlaylists struct to a XML file at the given path
+func (d *djPlaylists) write(path string) error {
+	xml, err := xml.MarshalIndent(d, " ", "  ")
 	if err != nil {
 		return err
 	}
@@ -113,7 +137,8 @@ func Export(library *db.Library, path string) error {
 	if err != nil {
 		return err
 	}
-	err = exportInsert(&djPlaylists, path)
+	djPlaylists.sort()
+	err = djPlaylists.write(path)
 	if err != nil {
 		return err
 	}
