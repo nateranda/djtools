@@ -20,7 +20,8 @@ const (
 )
 
 var defaultOptions = engine.ImportOptions{
-	PreserveOriginalPaths: true, // preserve original relative filepaths for operating system parity
+	// preserve original relative filepaths for operating system parity
+	PreserveOriginalPaths: true,
 }
 
 type test struct {
@@ -72,13 +73,26 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 	return tempdir
 }
 
-// sortSongs sorts lib.Library songs based on id,
-// used because lib.Library.Songs is order-agnostic
+// sortSongs sorts lib.Library songs based on id and sorts each song's cues
+// and loops by position, used because lib.Library.Songs is order-agnostic
 func sortSongs(library *lib.Library) {
 	songs := library.Songs
+
+	// sort songs by id
 	sort.Slice(songs, func(i, j int) bool {
 		return songs[i].SongID < songs[j].SongID
 	})
+
+	// sort cues and loops by position
+	for i := range songs {
+		sort.Slice(songs[i].Cues, func(a, b int) bool {
+			return songs[i].Cues[a].Position < songs[i].Cues[b].Position
+		})
+		sort.Slice(songs[i].Loops, func(a, b int) bool {
+			return songs[i].Loops[a].Position < songs[i].Loops[b].Position
+		})
+	}
+
 	library.Songs = songs
 }
 
@@ -112,6 +126,7 @@ func TestImport(t *testing.T) {
 			sortSongs(&library)
 			if test.saveStub {
 				lib.SaveJson(t, library, stubsDir+test.filename)
+				t.Fail()
 			}
 			stub := lib.LoadJson(t, stubsDir+test.filename)
 			assert.Nil(t, err, "Valid database import should return no errors.")
