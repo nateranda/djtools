@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// saveStub saves a db.Library struct to a json-formatted stub
+// SaveJson saves a db.Library struct to a json-formatted stub
 func SaveJson(t *testing.T, library Library, path string) {
 	t.Helper()
 	file, err := os.Create(path)
@@ -25,7 +25,7 @@ func SaveJson(t *testing.T, library Library, path string) {
 	}
 }
 
-// loadStub loads a json-formatted db.Library struct stub
+// LoadJson loads a json-formatted db.Library struct stub
 func LoadJson(t *testing.T, path string) Library {
 	t.Helper()
 	file, err := os.Open(path)
@@ -44,6 +44,7 @@ func LoadJson(t *testing.T, path string) Library {
 	return library
 }
 
+// CopyFile copies a file from a source to a destination
 func CopyFile(t *testing.T, srcPath string, destPath string) {
 	t.Helper()
 	srcFile, err := os.Open(srcPath)
