@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+	"sort"
 )
 
 // Marker is a marker in a beatgrid.
@@ -113,4 +114,23 @@ func Load(library *Library, path string) error {
 		return fmt.Errorf("error loading library from file: %v", err)
 	}
 	return nil
+}
+
+// SortSongs sorts a Library's Songs based on id and sorts each Song's Cues
+// and Loops by position, used because Library.Songs is order-agnostic
+func (l *Library) SortSongs() {
+	// sort songs by id
+	sort.Slice(l.Songs, func(i, j int) bool {
+		return l.Songs[i].SongID < l.Songs[j].SongID
+	})
+
+	// sort cues and loops by position
+	for i := range l.Songs {
+		sort.Slice(l.Songs[i].Cues, func(a, b int) bool {
+			return l.Songs[i].Cues[a].Position < l.Songs[i].Cues[b].Position
+		})
+		sort.Slice(l.Songs[i].Loops, func(a, b int) bool {
+			return l.Songs[i].Loops[a].Position < l.Songs[i].Loops[b].Position
+		})
+	}
 }

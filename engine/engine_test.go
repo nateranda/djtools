@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"os"
-	"sort"
 	"testing"
 
 	"github.com/nateranda/djtools/engine"
@@ -73,29 +72,6 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 	return tempdir
 }
 
-// sortSongs sorts lib.Library songs based on id and sorts each song's cues
-// and loops by position, used because lib.Library.Songs is order-agnostic
-func sortSongs(library *lib.Library) {
-	songs := library.Songs
-
-	// sort songs by id
-	sort.Slice(songs, func(i, j int) bool {
-		return songs[i].SongID < songs[j].SongID
-	})
-
-	// sort cues and loops by position
-	for i := range songs {
-		sort.Slice(songs[i].Cues, func(a, b int) bool {
-			return songs[i].Cues[a].Position < songs[i].Cues[b].Position
-		})
-		sort.Slice(songs[i].Loops, func(a, b int) bool {
-			return songs[i].Loops[a].Position < songs[i].Loops[b].Position
-		})
-	}
-
-	library.Songs = songs
-}
-
 func TestImportInvalidPath(t *testing.T) {
 	_, err := engine.Import("invalid/path", defaultOptions)
 	assert.Equal(t, err,
@@ -123,7 +99,7 @@ func TestImport(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tempdir := generateDatabase(t, fixturesDir+test.dirname)
 			library, err := engine.Import(tempdir, test.options)
-			sortSongs(&library)
+			library.SortSongs()
 			if test.saveStub {
 				lib.SaveJson(t, library, stubsDir+test.filename)
 				t.Fail()
