@@ -5,24 +5,39 @@ import (
 	"fmt"
 )
 
-// queryAndScanRows queries a given database and scans
-// each row in the response based on a given function.
-func queryAndScanRows[T any](db *sql.DB, query string, scanFunc func(*sql.Rows) (T, error)) ([]T, error) {
-	r, err := db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute query '%s': %v", query, err)
-	}
-	defer r.Close()
+func importExtract(path string) (library, error) {
+	var enLibrary library
+	var err error
 
-	var results []T
-	for r.Next() {
-		item, err := scanFunc(r)
-		if err != nil {
-			return nil, fmt.Errorf("scan error: %v", err)
-		}
-		results = append(results, item)
+	m, hm, err := initDB(path)
+	if err != nil {
+		return library{}, err
 	}
-	return results, nil
+	enLibrary.songs, err = importExtractTrack(m)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting track data: %v", err)
+	}
+	enLibrary.songHistoryList, err = importExtractHistory(hm)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting history data: %v", err)
+	}
+	enLibrary.perfData, err = importExtractPerformanceData(m)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting performance data: %v", err)
+	}
+	enLibrary.playlists, err = importExtractPlaylist(m)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting playlists: %v", err)
+	}
+	enLibrary.playlistEntityList, err = importExtractPlaylistEntity(m)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting playlist data: %v", err)
+	}
+	enLibrary.smartlistList, err = importExtractSmartlist(m)
+	if err != nil {
+		return library{}, fmt.Errorf("error extracting smartlists: %v", err)
+	}
+	return enLibrary, nil
 }
 
 func importExtractTrack(db *sql.DB) ([]songNull, error) {
@@ -96,37 +111,22 @@ func importExtractSmartlist(db *sql.DB) ([]smartlist, error) {
 	})
 }
 
-func importExtract(path string) (library, error) {
-	var enLibrary library
-	var err error
+// queryAndScanRows queries a given database and scans
+// each row in the response based on a given function.
+func queryAndScanRows[T any](db *sql.DB, query string, scanFunc func(*sql.Rows) (T, error)) ([]T, error) {
+	r, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query '%s': %v", query, err)
+	}
+	defer r.Close()
 
-	m, hm, err := initDB(path)
-	if err != nil {
-		return library{}, err
+	var results []T
+	for r.Next() {
+		item, err := scanFunc(r)
+		if err != nil {
+			return nil, fmt.Errorf("scan error: %v", err)
+		}
+		results = append(results, item)
 	}
-	enLibrary.songs, err = importExtractTrack(m)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting track data: %v", err)
-	}
-	enLibrary.songHistoryList, err = importExtractHistory(hm)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting history data: %v", err)
-	}
-	enLibrary.perfData, err = importExtractPerformanceData(m)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting performance data: %v", err)
-	}
-	enLibrary.playlists, err = importExtractPlaylist(m)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting playlists: %v", err)
-	}
-	enLibrary.playlistEntityList, err = importExtractPlaylistEntity(m)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting playlist data: %v", err)
-	}
-	enLibrary.smartlistList, err = importExtractSmartlist(m)
-	if err != nil {
-		return library{}, fmt.Errorf("error extracting smartlists: %v", err)
-	}
-	return enLibrary, nil
+	return results, nil
 }
