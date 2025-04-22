@@ -1,0 +1,7 @@
+ <DJ_PLAYLISTS Version="1.0.0">
+   <PRODUCT Name="djtools" Version="0.1" Company="djtools"></PRODUCT>
+   <COLLECTION Entries="0"></COLLECTION>
+   <PLAYLISTS>
+     <NODE Type="0" Name="ROOT" KeyType="0"></NODE>
+   </PLAYLISTS>
+ </DJ_PLAYLISTS>
