@@ -96,7 +96,7 @@ func exportConvertRating(rating int) (int32, error) {
 	case 100:
 		return 255, nil
 	}
-	return 0, fmt.Errorf("NoMatchError: rating %d did not match convention. Must be 0, 20, 40, 60, 80, or 100", rating)
+	return -1, fmt.Errorf("NoMatchError: rating %d did not match convention. Must be 0, 20, 40, 60, 80, or 100", rating)
 }
 
 func exportConvertPositionMarks(song *lib.Song) []positionMark {
@@ -171,9 +171,18 @@ func exportConvertSubPlaylists(playlist lib.Playlist) []node {
 		for _, playlist := range playlist.SubPlaylists {
 			subNodes = slices.Concat(subNodes, exportConvertSubPlaylists(playlist))
 		}
+		// add '_folder' to playlist name if it contains songs
+		// to differentiate it from the actual playlist
+		var name string
+		if playlist.Songs != nil {
+			name = playlist.Name + "_folder"
+		} else {
+			name = playlist.Name
+		}
+
 		nodes = append(nodes, node{
 			NodeType: 0,
-			Name:     playlist.Name,
+			Name:     name,
 			Count:    int32(len(playlist.SubPlaylists)),
 			Nodes:    &subNodes,
 		})

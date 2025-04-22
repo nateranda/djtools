@@ -31,19 +31,19 @@
          <TRACK Key="4"></TRACK>
          <TRACK Key="2"></TRACK>
        </NODE>
-       <NODE Type="0" Name="playlist1" Count="1" KeyType="0">
+       <NODE Type="0" Name="playlist1_folder" Count="1" KeyType="0">
          <NODE Type="1" Name="playlist2" Entries="4" KeyType="0">
            <TRACK Key="3"></TRACK>
            <TRACK Key="4"></TRACK>
            <TRACK Key="2"></TRACK>
            <TRACK Key="1"></TRACK>
          </NODE>
-         <NODE Type="0" Name="playlist2" Count="1" KeyType="0">
+         <NODE Type="0" Name="playlist2_folder" Count="1" KeyType="0">
            <NODE Type="1" Name="playlist3" Entries="2" KeyType="0">
              <TRACK Key="2"></TRACK>
              <TRACK Key="1"></TRACK>
            </NODE>
-           <NODE Type="0" Name="playlist3" Count="1" KeyType="0"></NODE>
+           <NODE Type="0" Name="playlist3_folder" Count="1" KeyType="0"></NODE>
          </NODE>
        </NODE>
      </NODE>
