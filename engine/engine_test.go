@@ -110,9 +110,9 @@ func TestImport(t *testing.T) {
 			library, err := engine.Import(tempdir, test.options)
 			sortSongs(&library)
 			if test.saveStub {
-				db.SaveStub(t, library, stubsDir+test.filename)
+				db.SaveJson(t, library, stubsDir+test.filename)
 			}
-			stub := db.LoadStub(t, stubsDir+test.filename)
+			stub := db.LoadJson(t, stubsDir+test.filename)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})

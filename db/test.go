@@ -7,7 +7,7 @@ import (
 )
 
 // saveStub saves a db.Library struct to a json-formatted stub
-func SaveStub(t *testing.T, library Library, path string) {
+func SaveJson(t *testing.T, library Library, path string) {
 	file, err := os.Create(path)
 	if err != nil {
 		t.Errorf("unexpected error saving library stub: %v", err)
@@ -23,7 +23,7 @@ func SaveStub(t *testing.T, library Library, path string) {
 }
 
 // loadStub loads a json-formatted db.Library struct stub
-func LoadStub(t *testing.T, path string) Library {
+func LoadJson(t *testing.T, path string) Library {
 	file, err := os.Open(path)
 	if err != nil {
 		t.Errorf("unexpected error loading library stub: %v", err)
