@@ -33,6 +33,7 @@ type test struct {
 
 // generateDatabase generates an Engine database from m.sql and hm.sql files
 func generateDatabase(t *testing.T, fixturePath string) string {
+	t.Helper()
 	tempdir := t.TempDir() + "/"
 
 	//make Database2 directory inside of temp directory

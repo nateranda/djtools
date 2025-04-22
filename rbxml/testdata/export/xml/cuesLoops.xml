@@ -1,0 +1,45 @@
+ <DJ_PLAYLISTS Version="1.0.0">
+   <PRODUCT Name="djtools" Version="0.1" Company="djtools"></PRODUCT>
+   <COLLECTION Entries="5">
+     <TRACK TrackID="1" Name="Kanashī" Artist="1tbsp" Album="Kanashī (EP)" Genre="House" Kind="mp3" Size="13278700" TotalTime="329" Year="2021" DateModidied="2025-04-17" DateAdded="2025-04-17" BitRate="320" SampleRate="44100" LastPlayed="1969-12-31" Location="file://localhost/../DJ%20Music/1tbsp%20-%20Kanash%C4%AB.mp3" Tonality="7A">
+       <TEMPO Inizio="-1.8856825992220647" Bpm="124" Metro="4/4" Battito="1"></TEMPO>
+       <POSITION_MARK Name="" Type="0" Start="0.04980127174567744" Num="-1"></POSITION_MARK>
+     </TRACK>
+     <TRACK TrackID="2" Name="She Loves Me" Artist="DJ Seinfeld, Stella Explorer" Album="She Loves Me" Genre="Breakbeat" Kind="mp3" Size="9958707" TotalTime="248" Year="2021" AverageBpm="133" DateModidied="2025-04-17" DateAdded="2025-04-17" BitRate="320" SampleRate="44100" LastPlayed="1969-12-31" Location="file://localhost/../DJ%20Music/DJ%20Seinfeld%20&amp;%20Stella%20Explorer%20-%20She%20Loves%20Me.mp3" Tonality="12A" Label="Ninja Tune">
+       <TEMPO Inizio="-1.259451045769185" Bpm="133" Metro="4/4" Battito="1"></TEMPO>
+       <POSITION_MARK Name="" Type="0" Start="0.5450602324263039" Num="-1"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 1" Type="0" Start="6.003247707043017" Num="0"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 1" Type="4" Start="28.966112864005254" End="30.770624142200738" Num="0"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 2" Type="4" Start="34.37964669859172" End="34.830774518140586" Num="1"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 3" Type="4" Start="33.0262632399451" End="33.92851887904285" Num="2"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 4" Type="4" Start="101.1465639918248" End="102.49994745047142" Num="3"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 5" Type="4" Start="105.65784218731353" End="110.62024820235112" Num="4"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 6" Type="4" Start="66.86084970611051" End="68.21423316475713" Num="5"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 7" Type="4" Start="186.8608497061105" End="188.665360984306" Num="6"></POSITION_MARK>
+       <POSITION_MARK Name="Loop 8" Type="4" Start="235.5826542173887" End="236.48490985648647" Num="7"></POSITION_MARK>
+     </TRACK>
+     <TRACK TrackID="3" Name="zeal" Artist="E.O.U" Album="estream [PAL006]" Genre="Rave" Kind="mp3" Size="6094931" TotalTime="151" Year="2022" DateModidied="2025-04-17" DateAdded="2025-04-17" BitRate="320" SampleRate="44100" LastPlayed="1969-12-31" Location="file://localhost/../DJ%20Music/E.O.U%20-%20zeal.mp3" Tonality="4A">
+       <TEMPO Inizio="-0.18913783410709717" Bpm="155" Metro="4/4" Battito="1"></TEMPO>
+       <POSITION_MARK Name="" Type="0" Start="1.3592492626670964" Num="-1"></POSITION_MARK>
+     </TRACK>
+     <TRACK TrackID="4" Name="J.A.W.S. (Original Mix)" Artist="Lxury" Album="J.A.W.S" Genre="House" Kind="mp3" Size="14503202" TotalTime="362" Year="2013" AverageBpm="124" DateModidied="2025-04-17" DateAdded="2025-04-17" BitRate="320" SampleRate="44100" LastPlayed="1969-12-31" Location="file://localhost/../DJ%20Music/Lxury%20-%20J.A.W.S.%20%28Original%20Mix%29.mp3" Tonality="3B" Label="Method Records">
+       <TEMPO Inizio="-1.8282996040318007" Bpm="124.00000000000001" Metro="4/4" Battito="1"></TEMPO>
+       <POSITION_MARK Name="" Type="0" Start="31.074926202419807" Num="-1"></POSITION_MARK>
+     </TRACK>
+     <TRACK TrackID="5" Name="Purple Hearts (Original Mix)" Artist="Real Lies, Kettama" Album="Purple Hearts" Genre="Breakbeat" Kind="mp3" Size="9045772" TotalTime="194" Year="2024" AverageBpm="134" DateModidied="2025-04-17" DateAdded="2025-04-17" BitRate="320" SampleRate="44100" LastPlayed="1969-12-31" Location="file://localhost/../DJ%20Music/Real%20Lies%20&amp;%20Kettama%20-%20Purple%20Hearts%20%28Original%20Mix%29.mp3" Tonality="9A" Label="Steel City Dance Discs">
+       <TEMPO Inizio="-1.1609313974345963" Bpm="133.99999999999997" Metro="4/4" Battito="1"></TEMPO>
+       <POSITION_MARK Name="" Type="0" Start="0.6301133786848069" Num="-1"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 1" Type="0" Start="6.003247707043017" Num="0"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 2" Type="0" Start="77.64503875181914" Num="1"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 3" Type="0" Start="106.3017551697296" Num="2"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 4" Type="0" Start="151.07787457271468" Num="3"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 5" Type="0" Start="149.28682979659527" Num="4"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 6" Type="0" Start="152.86891934883408" Num="5"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 7" Type="0" Start="154.6599641249535" Num="6"></POSITION_MARK>
+       <POSITION_MARK Name="Cue 8" Type="0" Start="192.27190442346097" Num="7"></POSITION_MARK>
+     </TRACK>
+   </COLLECTION>
+   <PLAYLISTS>
+     <NODE Type="0" Name="ROOT" KeyType="0"></NODE>
+   </PLAYLISTS>
+ </DJ_PLAYLISTS>
