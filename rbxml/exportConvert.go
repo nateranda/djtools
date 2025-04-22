@@ -150,7 +150,7 @@ func exportConvertSubPlaylists(playlist db.Playlist) []node {
 	// add playlist node containing tracks
 	if playlist.Songs != nil {
 		var tracks []nodeTrack
-		for id := range playlist.Songs {
+		for _, id := range playlist.Songs {
 			tracks = append(tracks, nodeTrack{Id: int32(id)})
 		}
 		nodes = append(nodes, node{
