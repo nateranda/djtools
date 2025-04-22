@@ -12,6 +12,9 @@ import (
 )
 
 func unixToDate(date int) string {
+	if date == 0 {
+		return ""
+	}
 	t := time.Unix(int64(date), 0)
 	return t.Format("2006-01-02")
 }
