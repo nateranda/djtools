@@ -78,7 +78,7 @@ func exportConvertTonality(key int) (string, error) {
 	case 23:
 		return "7A", nil
 	}
-	return "", fmt.Errorf("key outside accepted range")
+	return "", fmt.Errorf("tonality '%d' is outside the accepted range", key)
 }
 
 func exportConvertRating(rating int) (int32, error) {
