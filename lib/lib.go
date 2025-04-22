@@ -1,3 +1,4 @@
+// This package contains shared datatypes and functions.
 package lib
 
 import (

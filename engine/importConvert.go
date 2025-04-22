@@ -143,8 +143,8 @@ func loopsFromBlob(sampleRate float64, blob []byte) ([]lib.Loop, error) {
 	return loops, nil
 }
 
-// hard to test - platform-specific
 func fullPathFromRelativePath(basePath string, relativePath string) (string, error) {
+	// hard to test - platform-specific
 	fullPath := filepath.Join(basePath, relativePath)
 	absolutePath, err := filepath.Abs(fullPath)
 	if err != nil {

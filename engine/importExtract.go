@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// queryAndScanRows is a generic helper that queries a given database and scans
+// queryAndScanRows queries a given database and scans
 // each row in the response based on a given function.
 func queryAndScanRows[T any](db *sql.DB, query string, scanFunc func(*sql.Rows) (T, error)) ([]T, error) {
 	r, err := db.Query(query)

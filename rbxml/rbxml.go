@@ -1,3 +1,4 @@
+// This package contains import and export functions for Rekordbox's XML format.
 package rbxml
 
 import (

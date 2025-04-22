@@ -1,3 +1,4 @@
+// This package contains import and export functions for Engine's database format.
 package engine
 
 import (
