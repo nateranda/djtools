@@ -1,4 +1,4 @@
-package db
+package lib
 
 import (
 	"encoding/gob"

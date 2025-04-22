@@ -1,4 +1,4 @@
-package db
+package lib
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// SaveJson saves a db.Library struct to a json-formatted stub
+// SaveJson saves a lib.Library struct to a json-formatted stub
 func SaveJson(t *testing.T, library Library, path string) {
 	t.Helper()
 	file, err := os.Create(path)
@@ -25,7 +25,7 @@ func SaveJson(t *testing.T, library Library, path string) {
 	}
 }
 
-// LoadJson loads a json-formatted db.Library struct stub
+// LoadJson loads a json-formatted lib.Library struct stub
 func LoadJson(t *testing.T, path string) Library {
 	t.Helper()
 	file, err := os.Open(path)

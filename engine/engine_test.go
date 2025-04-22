@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/nateranda/djtools/db"
 	"github.com/nateranda/djtools/engine"
+	"github.com/nateranda/djtools/lib"
 	"github.com/stretchr/testify/assert"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -72,9 +72,9 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 	return tempdir
 }
 
-// sortSongs sorts db.Library songs based on id,
-// used because db.Library.Songs is order-agnostic
-func sortSongs(library *db.Library) {
+// sortSongs sorts lib.Library songs based on id,
+// used because lib.Library.Songs is order-agnostic
+func sortSongs(library *lib.Library) {
 	songs := library.Songs
 	sort.Slice(songs, func(i, j int) bool {
 		return songs[i].SongID < songs[j].SongID
@@ -111,9 +111,9 @@ func TestImport(t *testing.T) {
 			library, err := engine.Import(tempdir, test.options)
 			sortSongs(&library)
 			if test.saveStub {
-				db.SaveJson(t, library, stubsDir+test.filename)
+				lib.SaveJson(t, library, stubsDir+test.filename)
 			}
-			stub := db.LoadJson(t, stubsDir+test.filename)
+			stub := lib.LoadJson(t, stubsDir+test.filename)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})

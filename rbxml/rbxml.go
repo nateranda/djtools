@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/lib"
 )
 
 const version string = "0.1"
@@ -132,7 +132,7 @@ func (d *djPlaylists) write(path string) error {
 	return nil
 }
 
-func Export(library *db.Library, path string) error {
+func Export(library *lib.Library, path string) error {
 	djPlaylists, err := exportConvert(library)
 	if err != nil {
 		return err

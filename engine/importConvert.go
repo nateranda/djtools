@@ -6,7 +6,7 @@ import (
 	"math"
 	"path/filepath"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/lib"
 )
 
 func beatDataFromBlob(blob []byte) (beatData, error) {
@@ -53,10 +53,10 @@ func beatDataFromBlob(blob []byte) (beatData, error) {
 	return beatData, nil
 }
 
-func gridFromBeatData(sampleRate float64, enGrid []marker) []db.Marker {
-	var grid []db.Marker
+func gridFromBeatData(sampleRate float64, enGrid []marker) []lib.Marker {
+	var grid []lib.Marker
 	for i := range len(enGrid) - 1 {
-		var marker db.Marker
+		var marker lib.Marker
 		marker.StartPosition = enGrid[i].offset / sampleRate
 		lenMarker := enGrid[i+1].offset - enGrid[i].offset
 		marker.Bpm = sampleRate * 60 * float64(enGrid[i].numBeats) / lenMarker
@@ -79,7 +79,7 @@ func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 			continue
 		}
 		i++
-		var cue db.HotCue
+		var cue lib.HotCue
 		cue.Position = pos + 1
 		cue.Name = string(blob[i : i+labelLength])
 		i += labelLength
@@ -91,7 +91,7 @@ func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 		i++
 		b := int(blob[i])
 		i++
-		color, err := db.RgbToHex(r, g, b)
+		color, err := lib.RgbToHex(r, g, b)
 		if err != nil {
 			return cueData{}, fmt.Errorf("error extracting cues from cueData blob: %v", err)
 		}
@@ -106,8 +106,8 @@ func cuesFromBlob(sampleRate float64, blob []byte) (cueData, error) {
 	return blobCueData, nil
 }
 
-func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
-	var loops []db.Loop
+func loopsFromBlob(sampleRate float64, blob []byte) ([]lib.Loop, error) {
+	var loops []lib.Loop
 	i := 8 // byte index, skipping number of loops (always 8)
 	for pos := range 8 {
 		labelLength := int(blob[i])
@@ -117,7 +117,7 @@ func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 			continue
 		}
 		i++
-		var loop db.Loop
+		var loop lib.Loop
 		loop.Position = pos + 1
 		loop.Name = string(blob[i : i+labelLength])
 		i += labelLength
@@ -132,7 +132,7 @@ func loopsFromBlob(sampleRate float64, blob []byte) ([]db.Loop, error) {
 		i++
 		b := int(blob[i])
 		i++
-		color, err := db.RgbToHex(r, g, b)
+		color, err := lib.RgbToHex(r, g, b)
 		if err != nil {
 			return nil, fmt.Errorf("error extracting loops from loops blob: %v", err)
 		}
@@ -153,7 +153,7 @@ func fullPathFromRelativePath(basePath string, relativePath string) (string, err
 	return absolutePath, nil
 }
 
-func importConvertSong(library *db.Library, songsNull []songNull, path string, importOptions ImportOptions) error {
+func importConvertSong(library *lib.Library, songsNull []songNull, path string, importOptions ImportOptions) error {
 	var err error
 	for _, song := range songsNull {
 		var songPath string
@@ -165,7 +165,7 @@ func importConvertSong(library *db.Library, songsNull []songNull, path string, i
 				return fmt.Errorf("error converting songs: %v", err)
 			}
 		}
-		library.Songs = append(library.Songs, db.Song{
+		library.Songs = append(library.Songs, lib.Song{
 			SongID:       int(song.id.Int64),
 			Title:        song.title.String,
 			Artist:       song.artist.String,
@@ -288,8 +288,8 @@ func populatePlaylists(playlistEntityList []playlistEntity, playlists []playlist
 	return playlists, nil
 }
 
-func importConvertPerformanceData(library *db.Library, perfData []performanceDataEntry, importOptions ImportOptions) error {
-	songMap := make(map[int]*db.Song)
+func importConvertPerformanceData(library *lib.Library, perfData []performanceDataEntry, importOptions ImportOptions) error {
+	songMap := make(map[int]*lib.Song)
 	for i, song := range library.Songs {
 		songMap[song.SongID] = &library.Songs[i]
 	}
@@ -352,8 +352,8 @@ func importConvertPerformanceData(library *db.Library, perfData []performanceDat
 	return nil
 }
 
-func importConvertHistory(library *db.Library, songHistoryList []songHistory) {
-	songMap := make(map[int]*db.Song)
+func importConvertHistory(library *lib.Library, songHistoryList []songHistory) {
+	songMap := make(map[int]*lib.Song)
 	for i, song := range library.Songs {
 		songMap[song.SongID] = &library.Songs[i]
 	}
@@ -369,7 +369,7 @@ func importConvertHistory(library *db.Library, songHistoryList []songHistory) {
 	}
 }
 
-func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
+func importConvertPlaylist(library *lib.Library, playlists []playlist, playlistEntityList []playlistEntity) error {
 	if playlists == nil {
 		return nil
 	}
@@ -379,7 +379,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 		return err
 	}
 
-	parentPlaylistAddressMap := make(map[int]*db.Playlist)
+	parentPlaylistAddressMap := make(map[int]*lib.Playlist)
 
 	var parentPlaylists []playlist
 	var playlistsNew []playlist
@@ -400,7 +400,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 
 	// move parent playlists to Library
 	for _, playlist := range parentPlaylists {
-		newPlaylist := db.Playlist{
+		newPlaylist := lib.Playlist{
 			Name:       playlist.title,
 			PlaylistID: playlist.id,
 			Songs:      playlist.songs,
@@ -445,7 +445,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 
 		// move new 'parent' playlists to library
 		for _, playlist := range parentPlaylistsNew {
-			newPlaylist := db.Playlist{
+			newPlaylist := lib.Playlist{
 				Name:       playlist.title,
 				PlaylistID: playlist.id,
 				Songs:      playlist.songs,
@@ -466,7 +466,7 @@ func importConvertPlaylist(library *db.Library, playlists []playlist, playlistEn
 	return nil
 }
 
-func removeSongFromPlaylists(playlists []db.Playlist, songID int) []db.Playlist {
+func removeSongFromPlaylists(playlists []lib.Playlist, songID int) []lib.Playlist {
 	for i := range playlists {
 		var updatedSongIDs []int
 		for _, id := range playlists[i].Songs {
@@ -484,7 +484,7 @@ func removeSongFromPlaylists(playlists []db.Playlist, songID int) []db.Playlist 
 	return playlists
 }
 
-func importCheckCorruptedSongs(library *db.Library) {
+func importCheckCorruptedSongs(library *lib.Library) {
 	for i, song := range library.Songs {
 		// this is expensive, but it should happen rarely so it's ok
 		if song.Corrupt {
@@ -498,20 +498,20 @@ func importCheckCorruptedSongs(library *db.Library) {
 	}
 }
 
-func importConvert(enLibrary library, path string, importOptions ImportOptions) (db.Library, error) {
-	var library db.Library
+func importConvert(enLibrary library, path string, importOptions ImportOptions) (lib.Library, error) {
+	var library lib.Library
 	err := importConvertSong(&library, enLibrary.songs, path, importOptions)
 	if err != nil {
-		return db.Library{}, err
+		return lib.Library{}, err
 	}
 	err = importConvertPerformanceData(&library, enLibrary.perfData, importOptions)
 	if err != nil {
-		return db.Library{}, err
+		return lib.Library{}, err
 	}
 	importConvertHistory(&library, enLibrary.songHistoryList)
 	err = importConvertPlaylist(&library, enLibrary.playlists, enLibrary.playlistEntityList)
 	if err != nil {
-		return db.Library{}, err
+		return lib.Library{}, err
 	}
 
 	importCheckCorruptedSongs(&library)

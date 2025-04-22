@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/lib"
 )
 
 func unixToDate(date int) string {
@@ -99,7 +99,7 @@ func exportConvertRating(rating int) (int32, error) {
 	return 0, fmt.Errorf("NoMatchError: rating %d did not match convention. Must be 0, 20, 40, 60, 80, or 100", rating)
 }
 
-func exportConvertPositionMarks(song *db.Song) []positionMark {
+func exportConvertPositionMarks(song *lib.Song) []positionMark {
 	var positionMarks []positionMark
 	// add cue point
 	positionMarks = append(positionMarks, positionMark{
@@ -132,7 +132,7 @@ func exportConvertPositionMarks(song *db.Song) []positionMark {
 	return positionMarks
 }
 
-func exportConvertGrid(song *db.Song) []tempo {
+func exportConvertGrid(song *lib.Song) []tempo {
 	var tempos []tempo
 
 	for _, grid := range song.Grid {
@@ -147,7 +147,7 @@ func exportConvertGrid(song *db.Song) []tempo {
 	return tempos
 }
 
-func exportConvertSubPlaylists(playlist db.Playlist) []node {
+func exportConvertSubPlaylists(playlist lib.Playlist) []node {
 	var nodes []node
 
 	// add playlist node containing tracks
@@ -182,7 +182,7 @@ func exportConvertSubPlaylists(playlist db.Playlist) []node {
 	return nodes
 }
 
-func exportConvertPlaylist(library *db.Library) node {
+func exportConvertPlaylist(library *lib.Library) node {
 	var nodes []node
 	for _, playlist := range library.Playlists {
 		nodes = slices.Concat(nodes, exportConvertSubPlaylists(playlist))
@@ -196,7 +196,7 @@ func exportConvertPlaylist(library *db.Library) node {
 	}
 }
 
-func exportConvertSong(library *db.Library) ([]track, error) {
+func exportConvertSong(library *lib.Library) ([]track, error) {
 	var tracks []track
 	for _, song := range library.Songs {
 		rating, err := exportConvertRating(song.Rating)
@@ -245,7 +245,7 @@ func exportConvertSong(library *db.Library) ([]track, error) {
 	return tracks, nil
 }
 
-func exportConvert(library *db.Library) (djPlaylists, error) {
+func exportConvert(library *lib.Library) (djPlaylists, error) {
 	djPlaylists := djPlaylists{
 		Version: "1.0.0",
 		Product: product{

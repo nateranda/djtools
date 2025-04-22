@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/lib"
 	"github.com/nateranda/djtools/rbxml"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +33,7 @@ func loadXml(t *testing.T, path string) []byte {
 }
 
 func TestExportInvalidDir(t *testing.T) {
-	var library db.Library
+	var library lib.Library
 	err := rbxml.Export(&library, "invalid/path.xml")
 	assert.Equal(t, errors.New("error exporting library: open invalid/path.xml: no such file or directory"), err, "invalid path should throw an error")
 }
@@ -50,11 +50,11 @@ func TestExport(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			library := db.LoadJson(t, jsonDirExport+test.jsonName)
+			library := lib.LoadJson(t, jsonDirExport+test.jsonName)
 			tempdir := t.TempDir() + "/"
 			err := rbxml.Export(&library, tempdir+"library.xml")
 			if test.saveStub {
-				db.CopyFile(t, tempdir+"library.xml", xmlDirExport+test.xmlName)
+				lib.CopyFile(t, tempdir+"library.xml", xmlDirExport+test.xmlName)
 				t.Fail()
 			}
 			export := loadXml(t, tempdir+"library.xml")

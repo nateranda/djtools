@@ -10,7 +10,7 @@ import (
 	"io"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/nateranda/djtools/db"
+	"github.com/nateranda/djtools/lib"
 )
 
 // ImportOptions contains the options used when importing an Engine library.
@@ -96,7 +96,7 @@ type beatData struct {
 }
 
 type cueData struct {
-	cues        []db.HotCue
+	cues        []lib.HotCue
 	cueOriginal float64
 	cueModified float64
 }
@@ -152,14 +152,14 @@ func initDB(path string) (*sql.DB, *sql.DB, error) {
 }
 
 // Import converts an Engine database into a djtools Library struct
-func Import(path string, importOptions ImportOptions) (db.Library, error) {
+func Import(path string, importOptions ImportOptions) (lib.Library, error) {
 	enLibrary, err := importExtract(path)
 	if err != nil {
-		return db.Library{}, err
+		return lib.Library{}, err
 	}
 	library, err := importConvert(enLibrary, path, importOptions)
 	if err != nil {
-		return db.Library{}, err
+		return lib.Library{}, err
 	}
 	return library, nil
 }
