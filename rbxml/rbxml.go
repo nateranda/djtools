@@ -160,6 +160,8 @@ func Import(path string) (lib.Library, error) {
 		return lib.Library{}, err
 	}
 
+	library.CheckCorruptedSongs()
+
 	return library, nil
 }
 

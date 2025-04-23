@@ -50,6 +50,10 @@ func importConvertSong(djPlaylists *djPlaylists) ([]lib.Song, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error converting song: %v", err)
 		}
+		var corrupt bool
+		if track.AverageBpm == 0 {
+			corrupt = true
+		}
 		markers := importConvertGrid(track)
 		cues, loops := importConvertCuesLoops(track)
 		song := lib.Song{
@@ -83,7 +87,7 @@ func importConvertSong(djPlaylists *djPlaylists) ([]lib.Song, error) {
 			Grid:         markers,
 			Cues:         cues,
 			Loops:        loops,
-			Corrupt:      false,
+			Corrupt:      corrupt,
 		}
 		songs = append(songs, song)
 	}
