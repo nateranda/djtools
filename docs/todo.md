@@ -3,14 +3,23 @@
 ### engine
 - [x] import
   - [x] basic features
-  - [x] edge case analysis
   - [x] testing
   - [ ] extended features
-    - [ ] mp3 offset adjustment
+    - [x] mp3 offset adjustment
     - [ ] smartlists
 
 ### rbxml
-- [ ] export
+- [x] export
   - [x] basic features
-  - [ ] edge case analysis
+  - [x] testing
+- [x] import
+  - [x] basic features
+  - [x] testing
+
+### serato
+- [ ] examine crate format
+- [ ] examine song geob tags
+- [ ] examine history format?
+- [ ] import
+  - [ ] basic features
   - [ ] testing
