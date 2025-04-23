@@ -33,7 +33,7 @@
         {
           "StartPosition": 0.077,
           "Bpm": 141,
-          "BeatNumber": 1
+          "BeatNumber": 0
         }
       ],
       "Cues": [
@@ -116,7 +116,7 @@
         {
           "StartPosition": 0.078,
           "Bpm": 160,
-          "BeatNumber": 1
+          "BeatNumber": 0
         }
       ],
       "Cues": null,
@@ -156,7 +156,7 @@
         {
           "StartPosition": 0.039,
           "Bpm": 138,
-          "BeatNumber": 1
+          "BeatNumber": 0
         }
       ],
       "Cues": null,

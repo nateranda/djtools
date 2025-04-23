@@ -147,7 +147,7 @@ func importConvertGrid(track track) []lib.Marker {
 		markers = append(markers, lib.Marker{
 			StartPosition: tempo.Inizio,
 			Bpm:           tempo.Bpm,
-			BeatNumber:    int(tempo.Battito),
+			BeatNumber:    int(tempo.Battito) - 1, // BeatNumber is 0-indexed
 		})
 	}
 	return markers

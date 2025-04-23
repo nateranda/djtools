@@ -152,8 +152,8 @@ func exportConvertGrid(song *lib.Song) []tempo {
 		tempos = append(tempos, tempo{
 			Inizio:  grid.StartPosition + offset,
 			Bpm:     grid.Bpm,
-			Metro:   "4/4", // assumed, may add time signature support later
-			Battito: int32(grid.BeatNumber) + 1,
+			Metro:   "4/4",                      // assumed, may add time signature support later
+			Battito: int32(grid.BeatNumber) + 1, // Battito is 1-indexed
 		})
 	}
 
