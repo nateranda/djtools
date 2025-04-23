@@ -31,7 +31,7 @@
       "Cue": 0.04980127174567744,
       "Grid": [
         {
-          "StartPosition": -1.8856825992220647,
+          "StartPosition": 0.04980127174567728,
           "Bpm": 124,
           "BeatNumber": 0
         }
@@ -71,9 +71,9 @@
       "Cue": 0.5450602324263039,
       "Grid": [
         {
-          "StartPosition": -1.259451045769185,
+          "StartPosition": 0.09393241287743148,
           "Bpm": 133,
-          "BeatNumber": 0
+          "BeatNumber": 3
         }
       ],
       "Cues": null,
@@ -168,9 +168,9 @@
       "Cue": 1.3592492626670964,
       "Grid": [
         {
-          "StartPosition": -0.18913783410709717,
+          "StartPosition": 0.1979589400864512,
           "Bpm": 155,
-          "BeatNumber": 0
+          "BeatNumber": 1
         }
       ],
       "Cues": null,
@@ -208,7 +208,7 @@
       "Cue": 31.074926202419807,
       "Grid": [
         {
-          "StartPosition": -1.8282996040318007,
+          "StartPosition": 0.10718426693594119,
           "Bpm": 124.00000000000001,
           "BeatNumber": 0
         }
@@ -248,9 +248,9 @@
       "Cue": 0.6301133786848069,
       "Grid": [
         {
-          "StartPosition": -1.1609313974345963,
+          "StartPosition": 0.18235218465495617,
           "Bpm": 133.99999999999997,
-          "BeatNumber": 0
+          "BeatNumber": 3
         }
       ],
       "Cues": [

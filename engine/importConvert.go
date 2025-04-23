@@ -398,6 +398,16 @@ func gridFromBeatData(sampleRate float64, enGrid []marker) []lib.Marker {
 		grid = append(grid, marker)
 	}
 
+	// other DJ software doesn't like negative grids, so this
+	// adjusts the first grid to be positive
+	if len(grid) >= 1 {
+		beatLength := 60 / grid[0].Bpm
+		for grid[0].StartPosition < 0 {
+			grid[0].StartPosition += beatLength
+			grid[0].BeatNumber = (grid[0].BeatNumber + 1) % 4
+		}
+	}
+
 	return grid
 }
 
