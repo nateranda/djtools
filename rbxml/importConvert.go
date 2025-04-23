@@ -50,10 +50,6 @@ func importConvertSong(djPlaylists *djPlaylists) ([]lib.Song, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error converting song: %v", err)
 		}
-		cue, err := importConvertCue(track)
-		if err != nil {
-			return nil, fmt.Errorf("error converting song: %v", err)
-		}
 		markers := importConvertGrid(track)
 		cues, loops := importConvertCuesLoops(track)
 		song := lib.Song{
@@ -84,7 +80,6 @@ func importConvertSong(djPlaylists *djPlaylists) ([]lib.Song, error) {
 			Label:        track.Label,
 			Mix:          track.Mix,
 			Color:        track.Colour,
-			Cue:          cue,
 			Grid:         markers,
 			Cues:         cues,
 			Loops:        loops,
@@ -137,19 +132,6 @@ func importConvertSubPlaylists(rbPlaylists *[]node, id *int) ([]lib.Playlist, []
 	}
 
 	return playlists, subSongs
-}
-
-func importConvertCue(track track) (float64, error) {
-	if track.PositionMark == nil {
-		return 0, nil
-	}
-	for _, mark := range *track.PositionMark {
-		if mark.MarkType == -1 {
-			return mark.Start, nil
-		}
-	}
-
-	return 0, fmt.Errorf("NotFoundError: did not find cue point for track id %d", track.TrackId)
 }
 
 func importConvertGrid(track track) []lib.Marker {
