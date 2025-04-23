@@ -17,11 +17,10 @@ Smart playlist conversion and MP3 offset correction is planned.
 ### Platforms
 Currently, `djtools` supports these platforms:
 - Engine: import
-- Rekordbox XML: export
+- Rekordbox XML: import and export
 
 `djtools` plans to support these platforms:
 - Engine: export
-- Rekordbox XML: import
 - Rekordbox: import and export
 - Algoriddim Djay: import and export
 - Serato: import and export
