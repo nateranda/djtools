@@ -3,6 +3,7 @@ package engine
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
 )
 
 func importExtract(path string) (library, error) {
@@ -38,6 +39,33 @@ func importExtract(path string) (library, error) {
 		return library{}, fmt.Errorf("error extracting smartlists: %v", err)
 	}
 	return enLibrary, nil
+}
+
+// initDB initializes the Engine SQL database at a given path.
+func initDB(path string) (*sql.DB, *sql.DB, error) {
+	// Construct platform-independent file paths
+	mPath := filepath.Join(path, "Database2", "m.db")
+	hmPath := filepath.Join(path, "Database2", "hm.db")
+
+	// Open and ping the m.db database
+	m, err := sql.Open("sqlite3", mPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error opening m.db: %v", err)
+	}
+	if err = m.Ping(); err != nil {
+		return nil, nil, fmt.Errorf("error initializing m.db: %v", err)
+	}
+
+	// Open and ping the hm.db database
+	hm, err := sql.Open("sqlite3", hmPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error opening hm.db: %v", err)
+	}
+	if err = hm.Ping(); err != nil {
+		return nil, nil, fmt.Errorf("error initializing hm.db: %v", err)
+	}
+
+	return m, hm, nil
 }
 
 func importExtractTrack(db *sql.DB) ([]songNull, error) {
