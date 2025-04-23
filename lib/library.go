@@ -11,7 +11,7 @@ import (
 type Marker struct {
 	StartPosition float64 // start position in seconds
 	Bpm           float64 // beats per minute
-	BeatNumber    int     // beat in measure to start on, 1-indexed, assumed 4/4
+	BeatNumber    int     // beat in measure to start on, 0-indexed, assumed 4/4
 }
 
 // HotCue is a saved hot cue for a song.
