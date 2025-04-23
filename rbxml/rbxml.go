@@ -133,7 +133,7 @@ func (d *djPlaylists) write(path string) error {
 	return nil
 }
 
-// write writes a djPlaylists struct to a XML file at the given path
+// read reads a djPlaylists struct from a XML file at the given path
 func (d *djPlaylists) read(path string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
