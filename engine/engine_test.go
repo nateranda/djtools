@@ -78,9 +78,8 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 
 func TestImportInvalidPath(t *testing.T) {
 	_, err := engine.Import("invalid/path", defaultOptions)
-	assert.Equal(t, err,
-		errors.New("error initializing database: unable to open database file: no such file or directory"),
-		"Invalid path should throw an error.")
+	assert.Equal(t, errors.New("error initializing m.db: unable to open database file: no such file or directory"),
+		err, "Invalid path should throw an error.")
 }
 
 func TestImport(t *testing.T) {
