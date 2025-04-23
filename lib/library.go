@@ -134,3 +134,36 @@ func (l *Library) SortSongs() {
 		})
 	}
 }
+
+// CheckCorruptedSongs removes songs marked as corrupted from the Library
+func (l *Library) CheckCorruptedSongs() {
+	for i, song := range l.Songs {
+		// this is expensive, but it should happen rarely so it's ok
+		if song.Corrupt {
+			// remove song from library.Songs (doesn't preserve order)
+			l.Songs[i] = l.Songs[len(l.Songs)-1]
+			l.Songs = l.Songs[:len(l.Songs)-1]
+
+			// remove song from playlists
+			l.Playlists = removeSongFromPlaylists(l.Playlists, song.SongID)
+		}
+	}
+}
+
+func removeSongFromPlaylists(playlists []Playlist, songID int) []Playlist {
+	for i := range playlists {
+		var updatedSongIDs []int
+		for _, id := range playlists[i].Songs {
+			if id != songID {
+				updatedSongIDs = append(updatedSongIDs, id)
+			}
+		}
+		playlists[i].Songs = updatedSongIDs
+
+		if playlists[i].SubPlaylists != nil {
+			playlists[i].SubPlaylists = removeSongFromPlaylists(playlists[i].SubPlaylists, songID)
+		}
+	}
+
+	return playlists
+}

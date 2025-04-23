@@ -25,7 +25,7 @@ func importConvert(enLibrary library, path string, importOptions ImportOptions) 
 		return lib.Library{}, err
 	}
 
-	checkCorruptedSongs(&library)
+	library.CheckCorruptedSongs()
 
 	return library, nil
 }
@@ -485,36 +485,4 @@ func fullPathFromRelativePath(basePath string, relativePath string) (string, err
 		return "", err
 	}
 	return absolutePath, nil
-}
-
-func removeSongFromPlaylists(playlists []lib.Playlist, songID int) []lib.Playlist {
-	for i := range playlists {
-		var updatedSongIDs []int
-		for _, id := range playlists[i].Songs {
-			if id != songID {
-				updatedSongIDs = append(updatedSongIDs, id)
-			}
-		}
-		playlists[i].Songs = updatedSongIDs
-
-		if playlists[i].SubPlaylists != nil {
-			playlists[i].SubPlaylists = removeSongFromPlaylists(playlists[i].SubPlaylists, songID)
-		}
-	}
-
-	return playlists
-}
-
-func checkCorruptedSongs(library *lib.Library) {
-	for i, song := range library.Songs {
-		// this is expensive, but it should happen rarely so it's ok
-		if song.Corrupt {
-			// remove song from library.Songs (doesn't preserve order)
-			library.Songs[i] = library.Songs[len(library.Songs)-1]
-			library.Songs = library.Songs[:len(library.Songs)-1]
-
-			// remove song from playlists
-			library.Playlists = removeSongFromPlaylists(library.Playlists, song.SongID)
-		}
-	}
 }
