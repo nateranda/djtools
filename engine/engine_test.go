@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nateranda/djtools/engine"
@@ -13,10 +14,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	fixturesDir = "testdata/import/fixtures/"
-	stubsDir    = "testdata/import/stubs/"
-)
+var fixturesDir string = filepath.Join("testdata", "import", "fixtures")
+var stubsDir string = filepath.Join("testdata", "import", "stubs")
 
 var defaultOptions = engine.ImportOptions{
 	// preserve original relative filepaths for operating system parity
@@ -34,19 +33,22 @@ type test struct {
 // generateDatabase generates an Engine database from m.sql and hm.sql files
 func generateDatabase(t *testing.T, fixturePath string) string {
 	t.Helper()
-	tempdir := t.TempDir() + "/"
+	tempdir := t.TempDir()
 
 	//make Database2 directory inside of temp directory
-	os.Mkdir(tempdir+"Database2/", 0755)
+	path := filepath.Join(tempdir, "Database2")
+	os.Mkdir(path, 0755)
 
 	// open and populate m.db with given fixture
-	m, _ := sql.Open("sqlite3", tempdir+"Database2/m.db")
+	path = filepath.Join(tempdir, "Database2", "m.db")
+	m, _ := sql.Open("sqlite3", path)
 	err := m.Ping()
 	if err != nil {
 		t.Errorf("unexpected error creating test database: %v", err)
 	}
 
-	queryByte, err := os.ReadFile(fixturePath + "m.sql")
+	path = filepath.Join(fixturePath, "m.sql")
+	queryByte, err := os.ReadFile(path)
 	if err != nil {
 		t.Errorf("unexpected error reading from m.db fixture: %v", err)
 	}
@@ -55,13 +57,15 @@ func generateDatabase(t *testing.T, fixturePath string) string {
 	m.Exec(query)
 
 	// open and populate hm.db with given fixture
-	hm, _ := sql.Open("sqlite3", tempdir+"Database2/hm.db")
+	path = filepath.Join(tempdir, "Database2", "hm.db")
+	hm, _ := sql.Open("sqlite3", path)
 	err = hm.Ping()
 	if err != nil {
 		t.Errorf("unexpected error creating test database: %v", err)
 	}
 
-	queryByte, err = os.ReadFile(fixturePath + "hm.sql")
+	path = filepath.Join(fixturePath, "hm.sql")
+	queryByte, err = os.ReadFile(path)
 	if err != nil {
 		t.Errorf("unexpected error reading from m.db fixture: %v", err)
 	}
@@ -81,30 +85,32 @@ func TestImportInvalidPath(t *testing.T) {
 
 func TestImport(t *testing.T) {
 	tests := []test{
-		{"Empty", "empty/", "empty.json", false, defaultOptions},
-		{"Songs", "songs/", "songs.json", false, defaultOptions},
-		{"SongsOriginal", "songsOriginal/", "songsOriginal.json", false, engine.ImportOptions{
+		{"Empty", "empty", "empty.json", false, defaultOptions},
+		{"Songs", "songs", "songs.json", false, defaultOptions},
+		{"SongsOriginal", "songsOriginal", "songsOriginal.json", false, engine.ImportOptions{
 			PreserveOriginalPaths: true,
 			ImportOriginalCues:    true,
 			ImportOriginalGrids:   true,
 		}},
-		{"AlteredPerformanceData", "alteredPerformanceData/", "alteredPerformanceData.json", false, defaultOptions},
-		{"Playlists", "playlists/", "playlists.json", false, defaultOptions},
-		{"NestedPlaylists", "nestedPlaylists/", "nestedPlaylists.json", false, defaultOptions},
-		{"CorruptSong", "corruptSong/", "corruptSong.json", false, defaultOptions},
-		{"History", "history/", "history.json", false, defaultOptions},
+		{"AlteredPerformanceData", "alteredPerformanceData", "alteredPerformanceData.json", false, defaultOptions},
+		{"Playlists", "playlists", "playlists.json", false, defaultOptions},
+		{"NestedPlaylists", "nestedPlaylists", "nestedPlaylists.json", false, defaultOptions},
+		{"CorruptSong", "corruptSong", "corruptSong.json", false, defaultOptions},
+		{"History", "history", "history.json", false, defaultOptions},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			tempdir := generateDatabase(t, fixturesDir+test.dirname)
+			path := filepath.Join(fixturesDir, test.dirname)
+			tempdir := generateDatabase(t, path)
 			library, err := engine.Import(tempdir, test.options)
 			library.SortSongs()
+			path = filepath.Join(stubsDir, test.filename)
 			if test.saveStub {
-				lib.SaveJson(t, library, stubsDir+test.filename)
+				lib.SaveJson(t, library, path)
 				t.Fail()
 			}
-			stub := lib.LoadJson(t, stubsDir+test.filename)
+			stub := lib.LoadJson(t, path)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})

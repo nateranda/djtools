@@ -3,6 +3,7 @@ package rbxml_test
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nateranda/djtools/lib"
@@ -10,12 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	xmlDirExport  string = "testdata/export/xml/"
-	jsonDirExport string = "testdata/export/json/"
-	xmlDirImport  string = "testdata/import/xml/"
-	jsonDirImport string = "testdata/import/json/"
-)
+var xmlDirExport string = filepath.Join("testdata", "export", "xml")
+var jsonDirExport string = filepath.Join("testdata", "export", "json")
+var xmlDirImport string = filepath.Join("testdata", "import", "xml")
+var jsonDirImport string = filepath.Join("testdata", "import", "json")
 
 type test struct {
 	name     string // name of test
@@ -53,15 +52,17 @@ func TestExport(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			library := lib.LoadJson(t, jsonDirExport+test.jsonName)
-			tempdir := t.TempDir() + "/"
-			err := rbxml.Export(&library, tempdir+"library.xml")
+			path := filepath.Join(jsonDirExport, test.jsonName)
+			library := lib.LoadJson(t, path)
+			tempPath := filepath.Join(t.TempDir(), "library.xml")
+			err := rbxml.Export(&library, tempPath)
+			path = filepath.Join(xmlDirExport, test.xmlName)
 			if test.saveStub {
-				lib.CopyFile(t, tempdir+"library.xml", xmlDirExport+test.xmlName)
+				lib.CopyFile(t, tempPath, path)
 				t.Fail()
 			}
-			export := loadXml(t, tempdir+"library.xml")
-			check := loadXml(t, xmlDirExport+test.xmlName)
+			export := loadXml(t, tempPath)
+			check := loadXml(t, path)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, check, export, "Library should match expected output.")
 		})
@@ -86,13 +87,15 @@ func TestImport(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			library, err := rbxml.Import(xmlDirImport + test.xmlName)
+			path := filepath.Join(xmlDirImport, test.xmlName)
+			library, err := rbxml.Import(path)
 			library.SortSongs()
+			path = filepath.Join(jsonDirImport, test.jsonName)
 			if test.saveStub {
-				lib.SaveJson(t, library, jsonDirImport+test.jsonName)
+				lib.SaveJson(t, library, path)
 				t.Fail()
 			}
-			stub := lib.LoadJson(t, jsonDirImport+test.jsonName)
+			stub := lib.LoadJson(t, path)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})
