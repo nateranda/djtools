@@ -100,11 +100,17 @@ func exportConvertRating(rating int) (int32, error) {
 }
 
 func exportConvertPositionMarks(song *lib.Song) []positionMark {
+	var offset float64
+	if song.Filetype == "mp3" {
+		offset = 0.05
+	} else {
+		offset = 0
+	}
 	var positionMarks []positionMark
 	// add cue point
 	positionMarks = append(positionMarks, positionMark{
 		MarkType: 0,
-		Start:    song.Cue,
+		Start:    song.Cue + offset,
 		Num:      -1,
 	})
 
@@ -113,7 +119,7 @@ func exportConvertPositionMarks(song *lib.Song) []positionMark {
 		positionMarks = append(positionMarks, positionMark{
 			Name:     cue.Name,
 			MarkType: 0,
-			Start:    cue.Offset,
+			Start:    cue.Offset + offset,
 			Num:      int32(cue.Position - 1),
 		})
 	}
@@ -123,8 +129,8 @@ func exportConvertPositionMarks(song *lib.Song) []positionMark {
 		positionMarks = append(positionMarks, positionMark{
 			Name:     loop.Name,
 			MarkType: 4,
-			Start:    loop.Start,
-			End:      loop.End,
+			Start:    loop.Start + offset,
+			End:      loop.End + offset,
 			Num:      int32(loop.Position - 1),
 		})
 	}
@@ -135,9 +141,16 @@ func exportConvertPositionMarks(song *lib.Song) []positionMark {
 func exportConvertGrid(song *lib.Song) []tempo {
 	var tempos []tempo
 
+	var offset float64
+	if song.Filetype == "mp3" {
+		offset = 0.05
+	} else {
+		offset = 0
+	}
+
 	for _, grid := range song.Grid {
 		tempos = append(tempos, tempo{
-			Inizio:  grid.StartPosition,
+			Inizio:  grid.StartPosition + offset,
 			Bpm:     grid.Bpm,
 			Metro:   "4/4", // assumed, may add time signature support later
 			Battito: int32(grid.BeatNumber) + 1,
