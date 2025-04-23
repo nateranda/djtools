@@ -13,6 +13,8 @@ import (
 const (
 	xmlDirExport  string = "testdata/export/xml/"
 	jsonDirExport string = "testdata/export/json/"
+	xmlDirImport  string = "testdata/import/xml/"
+	jsonDirImport string = "testdata/import/json/"
 )
 
 type test struct {
@@ -32,10 +34,11 @@ func loadXml(t *testing.T, path string) []byte {
 	return data
 }
 
-func TestExportInvalidDir(t *testing.T) {
+func TestExportInvalidPath(t *testing.T) {
 	var library lib.Library
 	err := rbxml.Export(&library, "invalid/path.xml")
-	assert.Equal(t, errors.New("error exporting library: open invalid/path.xml: no such file or directory"), err, "invalid path should throw an error")
+	assert.Equal(t, errors.New("error exporting library: open invalid/path.xml: no such file or directory"),
+		err, "invalid path should throw an error")
 }
 
 func TestExport(t *testing.T) {
@@ -61,6 +64,37 @@ func TestExport(t *testing.T) {
 			check := loadXml(t, xmlDirExport+test.xmlName)
 			assert.Nil(t, err, "Valid database import should return no errors.")
 			assert.Equal(t, check, export, "Library should match expected output.")
+		})
+	}
+}
+
+func TestImportInvalidPath(t *testing.T) {
+	_, err := rbxml.Import("invalid/path/library.xml")
+	assert.Equal(t, errors.New("error reading file: open invalid/path/library.xml: no such file or directory"),
+		err, "Invalid path should throw an error.")
+}
+
+func TestImport(t *testing.T) {
+	tests := []test{
+		{"Empty", "empty.json", "empty.xml", false},
+		{"Songs", "songs.json", "songs.xml", false},
+		{"CorruptSong", "corruptSong.json", "corruptSong.xml", false},
+		{"CuesLoops", "cuesLoops.json", "cuesLoops.xml", false},
+		{"Playlists", "playlists.json", "playlists.xml", false},
+		{"NestedPlaylists", "nestedPlaylists.json", "nestedPlaylists.xml", false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			library, err := rbxml.Import(xmlDirImport + test.xmlName)
+			library.SortSongs()
+			if test.saveStub {
+				lib.SaveJson(t, library, jsonDirImport+test.jsonName)
+				t.Fail()
+			}
+			stub := lib.LoadJson(t, jsonDirImport+test.jsonName)
+			assert.Nil(t, err, "Valid database import should return no errors.")
+			assert.Equal(t, library, stub, "Library should match expected output.")
 		})
 	}
 }

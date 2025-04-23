@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<DJ_PLAYLISTS Version="1.0.0">
+  <PRODUCT Name="rekordbox" Version="7.1.0" Company="AlphaTheta"/>
+  <COLLECTION Entries="3">
+    <TRACK TrackID="47763673" Name="B Somebody (X CLUB. Remix)" Artist="SG Lewis, Chloé Caillet, X CLUB."
+           Composer="" Album="B Somebody (X CLUB. Remix)" Grouping="" Genre="Techno"
+           Kind="MP3 File" Size="12719646" TotalTime="245" DiscNumber="0"
+           TrackNumber="1" Year="2025" AverageBpm="141.00" DateAdded="2025-04-20"
+           BitRate="320" SampleRate="44100" Comments="" PlayCount="0" Rating="0"
+           Location="file://localhost/Users/nateranda/Music/DJ%20Music/SG%20Lewis%20%26%20Chlo%c3%a9%20Caillet%20%26%20X%20CLUB.%20-%20B%20Somebody%20(X%20CLUB.%20Remix).mp3"
+           Remixer="" Tonality="2B" Label="SMIILE RECORDS SMIILE RECORDS"
+           Mix="">
+      <TEMPO Inizio="0.077" Bpm="141.00" Metro="4/4" Battito="1"/>
+    </TRACK>
+    <TRACK TrackID="244521470" Name="Gunman (Original Mix)" Artist="Riko Dan, Interplanetary Criminal"
+           Composer="" Album="ATW007" Grouping="" Genre="UK Garage" Kind="MP3 File"
+           Size="15324588" TotalTime="349" DiscNumber="0" TrackNumber="1"
+           Year="2024" AverageBpm="138.00" DateAdded="2025-04-20" BitRate="320"
+           SampleRate="44100" Comments="" PlayCount="0" Rating="0" Location="file://localhost/Users/nateranda/Music/DJ%20Music/Riko%20Dan%20%26%20Interplanetary%20Criminal%20-%20Gunman%20(Original%20Mix).mp3"
+           Remixer="" Tonality="10A" Label="ATW Records" Mix="">
+      <TEMPO Inizio="0.039" Bpm="138.00" Metro="4/4" Battito="1"/>
+    </TRACK>
+    <TRACK TrackID="234286363" Name="The Killing Sun (Makinarium Remix)"
+           Artist="Merely" Composer="" Album="The Killing Sun" Grouping=""
+           Genre="Trance" Kind="MP3 File" Size="16499947" TotalTime="411"
+           DiscNumber="0" TrackNumber="0" Year="2023" AverageBpm="160.00"
+           DateAdded="2025-04-20" BitRate="320" SampleRate="44100" Comments=""
+           PlayCount="0" Rating="0" Location="file://localhost/Users/nateranda/Music/DJ%20Music/Merely%20-%20The%20Killing%20Sun%20(Makinarium%20Remix).mp3"
+           Remixer="" Tonality="12B" Label="" Mix="">
+      <TEMPO Inizio="0.078" Bpm="160.00" Metro="4/4" Battito="1"/>
+    </TRACK>
+  </COLLECTION>
+  <PLAYLISTS>
+    <NODE Type="0" Name="ROOT" Count="0"/>
+  </PLAYLISTS>
+</DJ_PLAYLISTS>
