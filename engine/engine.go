@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nateranda/djtools/lib"
@@ -138,17 +139,28 @@ func qUncompress(file []byte) ([]byte, error) {
 
 // initDB initializes the Engine SQL database at a given path.
 func initDB(path string) (*sql.DB, *sql.DB, error) {
-	var err error
-	m, _ := sql.Open("sqlite3", path+"Database2/m.db")
-	err = m.Ping()
+	// Construct platform-independent file paths
+	mPath := filepath.Join(path, "Database2", "m.db")
+	hmPath := filepath.Join(path, "Database2", "hm.db")
+
+	// Open and ping the m.db database
+	m, err := sql.Open("sqlite3", mPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+		return nil, nil, fmt.Errorf("error opening m.db: %v", err)
 	}
-	hm, _ := sql.Open("sqlite3", path+"Database2/hm.db")
-	err = hm.Ping()
+	if err = m.Ping(); err != nil {
+		return nil, nil, fmt.Errorf("error initializing m.db: %v", err)
+	}
+
+	// Open and ping the hm.db database
+	hm, err := sql.Open("sqlite3", hmPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error initializing database: %v", err)
+		return nil, nil, fmt.Errorf("error opening hm.db: %v", err)
 	}
+	if err = hm.Ping(); err != nil {
+		return nil, nil, fmt.Errorf("error initializing hm.db: %v", err)
+	}
+
 	return m, hm, nil
 }
 
