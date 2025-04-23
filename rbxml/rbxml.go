@@ -133,12 +133,42 @@ func (d *djPlaylists) write(path string) error {
 	return nil
 }
 
+// write writes a djPlaylists struct to a XML file at the given path
+func (d *djPlaylists) read(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	err = xml.Unmarshal(data, d)
+	if err != nil {
+		return fmt.Errorf("error unmarshaling XML file: %v", err)
+	}
+
+	return nil
+}
+
+func Import(path string) (lib.Library, error) {
+	var djPlaylists djPlaylists
+	err := djPlaylists.read(path)
+	if err != nil {
+		return lib.Library{}, err
+	}
+
+	library, err := importConvert(&djPlaylists)
+	if err != nil {
+		return lib.Library{}, err
+	}
+
+	return library, nil
+}
+
 func Export(library *lib.Library, path string) error {
 	djPlaylists, err := exportConvert(library)
 	if err != nil {
 		return err
 	}
-	djPlaylists.sort()
+	djPlaylists.sort() // for testing purposes, not technically needed
 	err = djPlaylists.write(path)
 	if err != nil {
 		return err
