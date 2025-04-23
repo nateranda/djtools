@@ -97,9 +97,9 @@ type djPlaylists struct {
 	Playlists  playlists  `xml:"PLAYLISTS"`
 }
 
-// sort sorts a djPlaylists struct's songs by song id,
-// then each song's PositionMarks by cue, then cue points by id, then loops by id.
-// This is to standardize each XML output for testing and consistency
+// sort sorts a djPlaylists struct's songs by song id, then each
+// song's PositionMarks by cue, then cue points by id, then loops by id.
+// This is to standardize XML output for testing
 func (d *djPlaylists) sort() {
 	sort.Slice(d.Collection.Tracks, func(i, j int) bool {
 		return d.Collection.Tracks[i].TrackId < d.Collection.Tracks[j].TrackId
@@ -168,7 +168,7 @@ func Export(library *lib.Library, path string) error {
 	if err != nil {
 		return err
 	}
-	djPlaylists.sort() // for testing purposes, not technically needed
+	djPlaylists.sort() // for test parity
 	err = djPlaylists.write(path)
 	if err != nil {
 		return err
