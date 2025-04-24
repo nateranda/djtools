@@ -17,7 +17,7 @@ func importExtract(path string) error {
 	if err != nil {
 		return err
 	}
-	songs, err := importExtractGeobs(crates)
+	songs, err := importExtractSongs(crates)
 	if err != nil {
 		return err
 	}
@@ -63,38 +63,40 @@ func importExtractCrate(path string) (crate, error) {
 	return entries, nil
 }
 
-func importExtractGeobs(crates []crate) ([]song, error) {
+func importExtractSongs(crates []crate) ([]song, error) {
 	var songs []song
 	for _, crate := range crates {
 		for _, path := range crate.paths {
-			var song song
-			song.path = path
-			geobs, err := importExtractGeob(path)
+			song, err := importExtractSong(path)
 			if err != nil {
 				return nil, err
 			}
-			song.geobs = geobs
 			songs = append(songs, song)
 		}
 	}
 	return songs, nil
 }
 
-func importExtractGeob(path string) ([]geob, error) {
+func importExtractSong(path string) (song, error) {
+	var s song
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("error opening file: %v", err)
+		return song{}, fmt.Errorf("error opening file: %v", err)
 	}
 	defer file.Close()
 
+	s.path = path
+
+	// extract metadata
 	metadata, err := tag.ReadFrom(file)
 	if err != nil {
-		return nil, fmt.Errorf("error reading metadata: %v", err)
+		return song{}, fmt.Errorf("error reading metadata: %v", err)
 	}
 
+	// extract geobs
 	raw := metadata.Raw()
 	if raw == nil {
-		return nil, fmt.Errorf("no raw metadata found")
+		return song{}, fmt.Errorf("no raw metadata found")
 	}
 	var geobs []geob
 	for key := range raw {
@@ -112,7 +114,9 @@ func importExtractGeob(path string) ([]geob, error) {
 		return geobs[i].name < geobs[j].name
 	})
 
-	return geobs, nil
+	s.geobs = geobs
+
+	return s, nil
 }
 
 func (c *crate) extractCrateEntry(file []byte) ([]byte, error) {
