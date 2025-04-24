@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
