@@ -2,3 +2,4 @@
 databases/
 tmp/
 .vscode/
+__debug_*
