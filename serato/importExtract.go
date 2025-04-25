@@ -93,7 +93,15 @@ func importExtractSong(path string) (song, error) {
 		return song{}, fmt.Errorf("error reading metadata: %v", err)
 	}
 
-	// extract geobs
+	s.tags.title = metadata.Title()
+	s.tags.album = metadata.Album()
+	s.tags.artist = metadata.Artist()
+	s.tags.composer = metadata.Composer()
+	s.tags.genre = metadata.Genre()
+	s.tags.year = metadata.Year()
+	s.tags.trackNumber, _ = metadata.Track()
+
+	// extract raw
 	raw := metadata.Raw()
 	if raw == nil {
 		return song{}, fmt.Errorf("no raw metadata found")

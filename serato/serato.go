@@ -8,7 +8,18 @@ type crate struct {
 
 type song struct {
 	path  string
+	tags  tags
 	geobs []geob
+}
+
+type tags struct {
+	title       string
+	album       string
+	artist      string
+	composer    string
+	genre       string
+	year        int
+	trackNumber int
 }
 
 type geob struct {
