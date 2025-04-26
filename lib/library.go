@@ -3,7 +3,6 @@ package lib
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sort"
 )
@@ -84,11 +83,11 @@ type Library struct {
 }
 
 // Save saves a Library struct to a json file.
-// Used for development purposes only.
-func (library *Library) Save(path string) {
+// Used for development and testing purposes only.
+func (library *Library) Save(path string) error {
 	file, err := os.Create(path)
 	if err != nil {
-		log.Panic(fmt.Errorf("unexpected error saving library stub: %v", err))
+		return fmt.Errorf("unexpected error saving library stub: %v", err)
 	}
 	defer file.Close()
 
@@ -96,24 +95,26 @@ func (library *Library) Save(path string) {
 	encoder.SetIndent("", "  ")
 	err = encoder.Encode(library)
 	if err != nil {
-		log.Panic(fmt.Errorf("unexpected error saving library stub: %v", err))
+		return fmt.Errorf("unexpected error saving library stub: %v", err)
 	}
+	return nil
 }
 
 // Load loads a Library struct from a json file.
-// Used for development purposes only.
-func (library *Library) Load(path string) {
+// Used for development and testing purposes only.
+func (library *Library) Load(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Panic(fmt.Errorf("unexpected error loading library stub: %v", err))
+		return fmt.Errorf("unexpected error loading library stub: %v", err)
 	}
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(library)
 	if err != nil {
-		log.Panic(fmt.Errorf("unexpected error loading library stub: %v", err))
+		return fmt.Errorf("unexpected error loading library stub: %v", err)
 	}
+	return nil
 }
 
 // SortSongs sorts a Library's Songs based on id and sorts each Song's Cues

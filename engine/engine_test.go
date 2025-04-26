@@ -102,15 +102,22 @@ func TestImport(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			path := filepath.Join(fixturesDir, test.dirname)
 			tempdir := generateDatabase(t, path)
-			library, err := engine.Import(tempdir, test.options)
+			library, liberr := engine.Import(tempdir, test.options)
 			library.SortSongs()
 			path = filepath.Join(stubsDir, test.filename)
 			if test.saveStub {
-				lib.SaveJson(t, library, path)
+				err := library.Save(path)
+				if err != nil {
+					t.Fatal(err)
+				}
 				t.Fail()
 			}
-			stub := lib.LoadJson(t, path)
-			assert.Nil(t, err, "Valid database import should return no errors.")
+			var stub lib.Library
+			err := stub.Load(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Nil(t, liberr, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})
 	}

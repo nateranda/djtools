@@ -52,8 +52,12 @@ func TestExport(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			var library lib.Library
 			path := filepath.Join(jsonDirExport, test.jsonName)
-			library := lib.LoadJson(t, path)
+			liberr := library.Load(path)
+			if liberr != nil {
+				t.Fatal(liberr)
+			}
 			tempPath := filepath.Join(t.TempDir(), "library.xml")
 			err := rbxml.Export(&library, tempPath)
 			path = filepath.Join(xmlDirExport, test.xmlName)
@@ -88,15 +92,22 @@ func TestImport(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			path := filepath.Join(xmlDirImport, test.xmlName)
-			library, err := rbxml.Import(path)
+			library, liberr := rbxml.Import(path)
 			library.SortSongs()
 			path = filepath.Join(jsonDirImport, test.jsonName)
 			if test.saveStub {
-				lib.SaveJson(t, library, path)
+				err := library.Save(path)
+				if err != nil {
+					t.Fatal(err)
+				}
 				t.Fail()
 			}
-			stub := lib.LoadJson(t, path)
-			assert.Nil(t, err, "Valid database import should return no errors.")
+			var stub lib.Library
+			err := stub.Load(path)
+			if liberr != nil {
+				t.Fatal(err)
+			}
+			assert.Nil(t, liberr, "Valid database import should return no errors.")
 			assert.Equal(t, library, stub, "Library should match expected output.")
 		})
 	}
