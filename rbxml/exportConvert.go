@@ -11,11 +11,14 @@ import (
 	"github.com/nateranda/djtools/lib"
 )
 
-func unixToDate(date int) string {
+func unixToDate(date int, options ExportOptions) string {
 	if date == 0 {
 		return ""
 	}
 	t := time.Unix(int64(date), 0)
+	if options.UseUTC {
+		t = t.UTC()
+	}
 	return t.Format("2006-01-02")
 }
 
@@ -218,7 +221,7 @@ func exportConvertPlaylist(library *lib.Library) node {
 	}
 }
 
-func exportConvertSong(library *lib.Library) ([]track, error) {
+func exportConvertSong(library *lib.Library, options ExportOptions) ([]track, error) {
 	var tracks []track
 	for _, song := range library.Songs {
 		rating, err := exportConvertRating(song.Rating)
@@ -246,13 +249,13 @@ func exportConvertSong(library *lib.Library) ([]track, error) {
 			TrackNumber:  int32(song.TrackNumber),
 			Year:         int32(song.Year),
 			AverageBpm:   float64(song.Bpm),
-			DateModified: unixToDate(song.DateModified),
-			DateAdded:    unixToDate(song.DateAdded),
+			DateModified: unixToDate(song.DateModified, options),
+			DateAdded:    unixToDate(song.DateAdded, options),
 			BitRate:      int32(song.Bitrate),
 			SampleRate:   song.SampleRate,
 			Comments:     song.Comment,
 			PlayCount:    int32(song.PlayCount),
-			LastPlayed:   unixToDate(song.LastPlayed),
+			LastPlayed:   unixToDate(song.LastPlayed, options),
 			Rating:       rating,
 			Location:     path,
 			Remixer:      song.Remixer,
@@ -267,7 +270,7 @@ func exportConvertSong(library *lib.Library) ([]track, error) {
 	return tracks, nil
 }
 
-func exportConvert(library *lib.Library) (djPlaylists, error) {
+func exportConvert(library *lib.Library, options ExportOptions) (djPlaylists, error) {
 	djPlaylists := djPlaylists{
 		Version: "1.0.0",
 		Product: product{
@@ -278,7 +281,7 @@ func exportConvert(library *lib.Library) (djPlaylists, error) {
 	}
 	var err error
 
-	djPlaylists.Collection.Tracks, err = exportConvertSong(library)
+	djPlaylists.Collection.Tracks, err = exportConvertSong(library, options)
 	djPlaylists.Collection.Entries = int32(len(djPlaylists.Collection.Tracks))
 	if err != nil {
 		return djPlaylists, err

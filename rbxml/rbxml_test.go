@@ -16,6 +16,10 @@ var jsonDirExport string = filepath.Join("testdata", "export", "json")
 var xmlDirImport string = filepath.Join("testdata", "import", "xml")
 var jsonDirImport string = filepath.Join("testdata", "import", "json")
 
+var exportOptions = rbxml.ExportOptions{
+	UseUTC: true,
+}
+
 type test struct {
 	name     string // name of test
 	jsonName string // json stub name
@@ -35,7 +39,7 @@ func loadXml(t *testing.T, path string) []byte {
 
 func TestExportInvalidPath(t *testing.T) {
 	var library lib.Library
-	err := rbxml.Export(&library, "invalid/path.xml")
+	err := rbxml.Export(&library, "invalid/path.xml", exportOptions)
 	assert.Equal(t, errors.New("error exporting library: open invalid/path.xml: no such file or directory"),
 		err, "invalid path should throw an error")
 }
@@ -59,7 +63,7 @@ func TestExport(t *testing.T) {
 				t.Fatal(liberr)
 			}
 			tempPath := filepath.Join(t.TempDir(), "library.xml")
-			err := rbxml.Export(&library, tempPath)
+			err := rbxml.Export(&library, tempPath, exportOptions)
 			path = filepath.Join(xmlDirExport, test.xmlName)
 			if test.saveStub {
 				lib.CopyFile(t, tempPath, path)

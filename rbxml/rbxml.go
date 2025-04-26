@@ -12,6 +12,10 @@ import (
 
 const version string = "0.1"
 
+type ExportOptions struct {
+	UseUTC bool
+}
+
 type product struct {
 	Name    string `xml:"Name,attr"`
 	Version string `xml:"Version,attr"`
@@ -165,8 +169,8 @@ func Import(path string) (lib.Library, error) {
 	return library, nil
 }
 
-func Export(library *lib.Library, path string) error {
-	djPlaylists, err := exportConvert(library)
+func Export(library *lib.Library, path string, options ExportOptions) error {
+	djPlaylists, err := exportConvert(library, options)
 	if err != nil {
 		return err
 	}
