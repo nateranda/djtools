@@ -35,7 +35,7 @@ Currently, `djtools` supports these platforms:
 - Purchase link finder: import a `djtools` library, a streaming service playlist, or a song name and get a list of links to buy the song(s) with their respective prices
 
 ## Usage
-Below illustrates basic usage of `gotools`. The example code imports an Engine library, removes the first playlist from the library, and exports the library to a Rekordbox XML file.
+Below illustrates basic usage of `djtools`. The example code imports an Engine library, removes the first playlist from the library, and exports the library to a Rekordbox XML file.
 ```go
 package main
 
